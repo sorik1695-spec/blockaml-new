@@ -3,10 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlockAML — профессиональная AML-проверка</title>
+    <title>BlockAML — проверка криптокошельков</title>
+    
+    <!-- Мета-теги для поиска -->
+    <meta name="description" content="BlockAML — профессиональная AML-проверка криптокошельков BTC, ETH, USDT и 5000+ монет. Узнайте риск кошелька перед сделкой.">
+    <meta name="keywords" content="AML проверка, криптокошелек, биткоин, USDT, TRX, антиотмывочные проверки">
+    <meta name="author" content="BlockAML">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph для соцсетей -->
+    <meta property="og:title" content="BlockAML — AML проверка кошельков">
+    <meta property="og:description" content="Проверьте криптокошелек на чистоту перед сделкой">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://blockaml.space">
+    
+    <!-- Предзагрузка ресурсов (ДОЛЖНО БЫТЬ В HEAD) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Подключение стилей -->
+    <link rel="stylesheet" href="style.css">
     <!-- Font Awesome для иконок -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
@@ -30,11 +50,13 @@
         <section class="result-section glass" id="resultSection" style="display: none;">
             <h3><i class="fas fa-file-alt"></i> Результат проверки кошелька</h3>
             
+            <!-- Дублируем адрес кошелька -->
             <div class="wallet-address-display">
                 <span class="wallet-label"><i class="fas fa-wallet"></i> Проверенный адрес:</span>
                 <span class="wallet-value" id="checkedAddress">—</span>
             </div>
             
+            <!-- Сетка статистики -->
             <div class="stats-grid">
                 <div class="stat-item">
                     <i class="fas fa-exchange-alt"></i>
@@ -58,7 +80,7 @@
                 </div>
             </div>
 
-            <!-- Круговой график риска -->
+            <!-- График риска -->
             <div class="risk-chart-container">
                 <div class="risk-chart" id="riskChart">
                     <div class="risk-chart-inner">
@@ -113,7 +135,6 @@
             
             <!-- Ежемесячные тарифы -->
             <div class="pricing-grid" id="monthlyPricing">
-                <!-- Базовый -->
                 <div class="pricing-card">
                     <div class="pricing-badge">Стартовый</div>
                     <div class="pricing-icon"><i class="fas fa-rocket"></i></div>
@@ -127,13 +148,11 @@
                         <p><i class="fas fa-check-circle"></i> 50 проверок</p>
                         <p><i class="fas fa-check-circle"></i> Детальная статистика</p>
                         <p><i class="fas fa-check-circle"></i> PDF-отчёты</p>
-                        <p><i class="fas fa-times-circle"></i> Приоритетная поддержка</p>
                     </div>
                     <div class="pricing-savings">Экономия 60%</div>
                     <button class="pricing-btn">Выбрать</button>
                 </div>
                 
-                <!-- Профессиональный (популярный) -->
                 <div class="pricing-card popular">
                     <div class="pricing-badge">🔥 Хит продаж</div>
                     <div class="pricing-icon"><i class="fas fa-crown"></i></div>
@@ -148,38 +167,14 @@
                         <p><i class="fas fa-check-circle"></i> Детальная статистика</p>
                         <p><i class="fas fa-check-circle"></i> PDF-отчёты</p>
                         <p><i class="fas fa-check-circle"></i> Приоритетная поддержка</p>
-                        <p><i class="fas fa-check-circle"></i> API-доступ</p>
                     </div>
                     <div class="pricing-savings">Экономия 68%</div>
                     <button class="pricing-btn popular-btn">Выбрать</button>
                 </div>
-                
-                <!-- Бизнес -->
-                <div class="pricing-card">
-                    <div class="pricing-badge">Для команд</div>
-                    <div class="pricing-icon"><i class="fas fa-building"></i></div>
-                    <h3>Бизнес</h3>
-                    <div class="pricing-price">
-                        <span class="price">2000</span>
-                        <span class="currency">TRX</span>
-                        <span class="period">/мес</span>
-                    </div>
-                    <div class="pricing-includes">
-                        <p><i class="fas fa-check-circle"></i> 300 проверок</p>
-                        <p><i class="fas fa-check-circle"></i> Детальная статистика</p>
-                        <p><i class="fas fa-check-circle"></i> PDF-отчёты</p>
-                        <p><i class="fas fa-check-circle"></i> Приоритетная поддержка 24/7</p>
-                        <p><i class="fas fa-check-circle"></i> API-доступ</p>
-                        <p><i class="fas fa-check-circle"></i> Командные аккаунты (3 шт)</p>
-                    </div>
-                    <div class="pricing-savings">Экономия 73%</div>
-                    <button class="pricing-btn">Выбрать</button>
-                </div>
             </div>
             
-            <!-- Годовые тарифы (изначально скрыты) -->
+            <!-- Годовые тарифы -->
             <div class="pricing-grid" id="yearlyPricing" style="display: none;">
-                <!-- Базовый годовой -->
                 <div class="pricing-card">
                     <div class="pricing-badge">Стартовый</div>
                     <div class="pricing-icon"><i class="fas fa-rocket"></i></div>
@@ -190,55 +185,9 @@
                         <span class="period">/год</span>
                     </div>
                     <div class="pricing-includes">
-                        <p><i class="fas fa-check-circle"></i> 600 проверок (50/мес)</p>
+                        <p><i class="fas fa-check-circle"></i> 600 проверок</p>
                         <p><i class="fas fa-check-circle"></i> Детальная статистика</p>
                         <p><i class="fas fa-check-circle"></i> PDF-отчёты</p>
-                        <p><i class="fas fa-check-circle"></i> Экономия 20%</p>
-                    </div>
-                    <div class="pricing-savings">+2 месяца бесплатно</div>
-                    <button class="pricing-btn">Выбрать</button>
-                </div>
-                
-                <!-- Профессиональный годовой -->
-                <div class="pricing-card popular">
-                    <div class="pricing-badge">🔥 Макс. выгода</div>
-                    <div class="pricing-icon"><i class="fas fa-crown"></i></div>
-                    <h3>Профессиональный</h3>
-                    <div class="pricing-price">
-                        <span class="price">11500</span>
-                        <span class="currency">TRX</span>
-                        <span class="period">/год</span>
-                    </div>
-                    <div class="pricing-includes">
-                        <p><i class="fas fa-check-circle"></i> 1800 проверок (150/мес)</p>
-                        <p><i class="fas fa-check-circle"></i> Детальная статистика</p>
-                        <p><i class="fas fa-check-circle"></i> PDF-отчёты</p>
-                        <p><i class="fas fa-check-circle"></i> Приоритетная поддержка</p>
-                        <p><i class="fas fa-check-circle"></i> API-доступ</p>
-                        <p><i class="fas fa-check-circle"></i> Экономия 20%</p>
-                    </div>
-                    <div class="pricing-savings">+2 месяца бесплатно</div>
-                    <button class="pricing-btn popular-btn">Выбрать</button>
-                </div>
-                
-                <!-- Бизнес годовой -->
-                <div class="pricing-card">
-                    <div class="pricing-badge">Для команд</div>
-                    <div class="pricing-icon"><i class="fas fa-building"></i></div>
-                    <h3>Бизнес</h3>
-                    <div class="pricing-price">
-                        <span class="price">19000</span>
-                        <span class="currency">TRX</span>
-                        <span class="period">/год</span>
-                    </div>
-                    <div class="pricing-includes">
-                        <p><i class="fas fa-check-circle"></i> 3600 проверок (300/мес)</p>
-                        <p><i class="fas fa-check-circle"></i> Детальная статистика</p>
-                        <p><i class="fas fa-check-circle"></i> PDF-отчёты</p>
-                        <p><i class="fas fa-check-circle"></i> Приоритетная поддержка 24/7</p>
-                        <p><i class="fas fa-check-circle"></i> API-доступ</p>
-                        <p><i class="fas fa-check-circle"></i> Командные аккаунты (3 шт)</p>
-                        <p><i class="fas fa-check-circle"></i> Экономия 20%</p>
                     </div>
                     <div class="pricing-savings">+2 месяца бесплатно</div>
                     <button class="pricing-btn">Выбрать</button>
@@ -319,8 +268,28 @@
         </footer>
     </div>
 
-    <!-- Подключаем jsPDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="script.js"></script>
+    <!-- Модальные окна -->
+    <div id="termsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Условия использования</h2>
+            <div class="modal-text">
+                <p>Здесь будут условия использования...</p>
+            </div>
+        </div>
+    </div>
+    <div id="amlModal" class="modal">
+        <div class="modal-content">
+            <span class="close-aml">&times;</span>
+            <h2>AML-политика</h2>
+            <div class="modal-text">
+                <p>Здесь будет AML-политика...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрипты в конце с defer -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="script.js" defer></script>
 </body>
 </html>
