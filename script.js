@@ -320,4 +320,222 @@ if (closeButtons.length) {
 window.addEventListener('click', (e) => {
     if (e.target === termsModal) termsModal.style.display = 'none';
     if (e.target === amlModal) amlModal.style.display = 'none';
+    /* Стили для Trust Wallet кнопки */
+.wallet-connect-wrapper {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.wallet-connect-btn {
+    background: linear-gradient(135deg, #3375BB, #235891);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.wallet-connect-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(51, 117, 187, 0.4);
+}
+
+.wallet-connect-btn img {
+    filter: brightness(0) invert(1);
+}
+
+#connectedStatus {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+}
+
+/* Карточка суммы */
+.amount-card {
+    background: linear-gradient(135deg, rgba(0, 201, 183, 0.1), rgba(0, 150, 136, 0.05));
+    border: 1px solid rgba(0, 201, 183, 0.3);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.amount-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #8a94a6;
+}
+
+.amount-label i {
+    color: #00c9b7;
+    font-size: 24px;
+}
+
+.amount-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #00c9b7;
+}
+
+/* Модальное окно approve */
+.approve-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.approve-modal-content {
+    background: linear-gradient(135deg, #1a1f2b, #0f1219);
+    border: 1px solid rgba(0, 201, 183, 0.3);
+    border-radius: 30px;
+    padding: 40px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+.approve-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.approve-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #00c9b7, #009688);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 30px;
+    color: #0b0e14;
+}
+
+.approve-header h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+.approve-subtitle {
+    color: #8a94a6;
+    font-size: 14px;
+}
+
+.approve-details {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: #8a94a6;
+}
+
+.info-value {
+    color: #fff;
+    font-weight: 600;
+}
+
+.info-value.highlight {
+    color: #00c9b7;
+    font-size: 20px;
+}
+
+.approve-warning {
+    background: rgba(255, 170, 94, 0.1);
+    border-left: 4px solid #ffaa5e;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+}
+
+.approve-warning i {
+    color: #ffaa5e;
+    font-size: 20px;
+}
+
+.warning-text strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #ffaa5e;
+}
+
+.warning-text p {
+    color: #8a94a6;
+    font-size: 13px;
+}
+
+.approve-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.cancel-btn {
+    flex: 1;
+    padding: 15px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.cancel-btn:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.confirm-btn {
+    flex: 1;
+    padding: 15px;
+    background: linear-gradient(135deg, #00c9b7, #009688);
+    border: none;
+    border-radius: 12px;
+    color: #0b0e14;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.confirm-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 201, 183, 0.3);
+}
 });
+
