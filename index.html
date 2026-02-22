@@ -3,282 +3,461 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlockAML — проверка криптокошельков</title>
+    <title>BlockAML — премиальная AML-проверка</title>
     
     <!-- Мета-теги -->
-    <meta name="description" content="BlockAML — профессиональная AML-проверка криптокошельков BTC, ETH, USDT и 5000+ монет.">
-    <meta name="keywords" content="AML проверка, криптокошелек, биткоин, USDT, TRX">
+    <meta name="description" content="BlockAML — профессиональная AML-проверка криптокошельков с мгновенными результатами и Telegram-уведомлениями">
+    <meta name="keywords" content="AML проверка, криптокошелек, безопасность криптовалют, USDT TRC20">
     <meta name="author" content="BlockAML">
     <meta name="robots" content="index, follow">
     
     <!-- Open Graph -->
-    <meta property="og:title" content="BlockAML — AML проверка кошельков">
-    <meta property="og:description" content="Проверьте криптокошелек на чистоту перед сделкой">
+    <meta property="og:title" content="BlockAML — премиальная AML проверка">
+    <meta property="og:description" content="Проверьте любой криптокошелек на чистоту за секунды">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://blockaml.space">
+    <meta property="og:image" content="https://blockaml.space/og-image.jpg">
     
-    <!-- Font Awesome -->
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Наши стили -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Анимированный фон -->
+    <div class="gradient-bg">
+        <div class="gradient-sphere sphere-1"></div>
+        <div class="gradient-sphere sphere-2"></div>
+        <div class="gradient-sphere sphere-3"></div>
+    </div>
+
     <div class="container">
-        <!-- Шапка -->
-        <header>
-            <h1 class="logo"><i class="fas fa-shield-alt"></i> BlockAML</h1>
-            <p class="tagline">Профессиональная AML-проверка кошельков BTC, ETH, USDT и 5000+ монет</p>
-        </header>
+        <!-- Навигация -->
+        <nav class="glass-nav">
+            <div class="nav-content">
+                <div class="logo">
+                    <i class="fas fa-shield-halos"></i>
+                    <span>Block<span class="accent">AML</span></span>
+                </div>
+                <div class="nav-links">
+                    <a href="#" class="active"><i class="fas fa-home"></i> Главная</a>
+                    <a href="#pricing"><i class="fas fa-tags"></i> Тарифы</a>
+                    <a href="#faq"><i class="fas fa-question-circle"></i> FAQ</a>
+                    <a href="https://t.me/sorik445" target="_blank" class="tg-nav-btn">
+                        <i class="fab fa-telegram"></i> Поддержка
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Герой секция -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <span class="badge"><i class="fas fa-bolt"></i> Мгновенная проверка</span>
+                <h1 class="hero-title">
+                    Проверка криптокошельков<br>
+                    <span class="gradient-text">с премиальным AML-анализом</span>
+                </h1>
+                <p class="hero-subtitle">
+                    BlockAML использует передовые алгоритмы для выявления рисков<br>
+                    и обеспечивает полную безопасность ваших транзакций
+                </p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">5000+</span>
+                        <span class="stat-label">Проверок в день</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">99.9%</span>
+                        <span class="stat-label">Точность</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">25+</span>
+                        <span class="stat-label">Стран</span>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- Форма проверки -->
-        <section class="check-section glass">
-            <h2>Проверить кошелёк</h2>
-            <div class="input-group">
-                <input type="text" id="walletInput" placeholder="Введите адрес кошелька" />
-                <button id="checkBtn"><i class="fas fa-search"></i> Проверить</button>
+        <section class="check-section glass-card">
+            <div class="section-header">
+                <i class="fas fa-search-shield"></i>
+                <h2>Начать проверку</h2>
+                <p>Введите адрес кошелька для мгновенного AML-анализа</p>
             </div>
-            <p class="hint"><i class="fas fa-info-circle"></i> Первая проверка — бесплатно. Далее от 25 TRX за проверку</p>
+            
+            <div class="input-wrapper">
+                <div class="input-group">
+                    <i class="fas fa-wallet input-icon"></i>
+                    <input type="text" id="walletInput" placeholder="Введите адрес кошелька (BTC, ETH, TRX, USDT...)" />
+                    <button id="checkBtn" class="glow-button">
+                        <i class="fas fa-shield-check"></i>
+                        <span>Проверить</span>
+                    </button>
+                </div>
+                <p class="hint">
+                    <i class="fas fa-info-circle"></i> 
+                    Первая проверка — бесплатно • Поддержка всех основных сетей
+                </p>
+            </div>
         </section>
 
         <!-- Блок результата -->
-        <section class="result-section glass" id="resultSection" style="display: none;">
-            <h3><i class="fas fa-file-alt"></i> Результат проверки кошелька</h3>
+        <section class="result-section glass-card" id="resultSection" style="display: none;">
+            <div class="result-header">
+                <i class="fas fa-file-certificate"></i>
+                <h3>Результат AML-анализа</h3>
+                <span class="result-badge" id="riskBadge">Низкий риск</span>
+            </div>
             
             <div class="wallet-address-display">
-                <span class="wallet-label"><i class="fas fa-wallet"></i> Проверенный адрес:</span>
-                <span class="wallet-value" id="checkedAddress">—</span>
-            </div>
-            
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <i class="fas fa-exchange-alt"></i>
-                    <span class="stat-label">Всего транзакций</span>
-                    <span class="stat-value" id="totalTx">—</span>
+                <div class="address-label">
+                    <i class="fas fa-qrcode"></i>
+                    <span>Проверенный адрес</span>
                 </div>
-                <div class="stat-item">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span class="stat-label">Подозрительных</span>
-                    <span class="stat-value" id="suspiciousTx">—</span>
-                </div>
-                <div class="stat-item">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span class="stat-label">Возраст кошелька</span>
-                    <span class="stat-value" id="walletAge">—</span>
-                </div>
-                <div class="stat-item">
-                    <i class="fas fa-clock"></i>
-                    <span class="stat-label">Последняя активность</span>
-                    <span class="stat-value" id="lastActive">—</span>
+                <div class="address-value-wrapper">
+                    <span class="address-value" id="checkedAddress">—</span>
+                    <button class="copy-btn" onclick="copyAddress()">
+                        <i class="fas fa-copy"></i>
+                    </button>
                 </div>
             </div>
 
-            <div class="risk-chart-container">
-                <div class="risk-chart" id="riskChart">
-                    <div class="risk-chart-inner">
-                        <span id="riskPercent">0%</span>
+            <div class="stats-grid modern">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-arrows-spin"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-label">Всего транзакций</span>
+                        <span class="stat-number" id="totalTx">—</span>
                     </div>
                 </div>
-                <div class="risk-legend">
-                    <span class="risk-label">Уровень риска</span>
-                    <span class="risk-level" id="riskLevel">Низкий</span>
+                <div class="stat-card warning">
+                    <div class="stat-icon">
+                        <i class="fas fa-triangle-exclamation"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-label">Подозрительных</span>
+                        <span class="stat-number" id="suspiciousTx">—</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-label">Возраст кошелька</span>
+                        <span class="stat-number" id="walletAge">—</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-label">Последняя активность</span>
+                        <span class="stat-number" id="lastActive">—</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="sources-list" id="sourcesList"></div>
+            <!-- Премиум график риска -->
+            <div class="risk-visualization">
+                <div class="risk-gauge">
+                    <svg class="gauge-svg" viewBox="0 0 200 100">
+                        <path d="M20 80 A80 80 0 0 1 180 80" fill="none" stroke="#2a2f3c" stroke-width="15" stroke-linecap="round"/>
+                        <path class="gauge-fill" id="gaugeFill" d="M20 80 A80 80 0 0 1 180 80" fill="none" stroke="#00c9b7" stroke-width="15" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
+                    </svg>
+                    <div class="gauge-center">
+                        <span class="gauge-percent" id="riskPercent">0%</span>
+                        <span class="gauge-label">уровень риска</span>
+                    </div>
+                </div>
+                <div class="risk-details">
+                    <div class="risk-meter">
+                        <div class="meter-bar">
+                            <div class="meter-fill" id="riskMeter" style="width: 0%"></div>
+                        </div>
+                        <div class="meter-markers">
+                            <span>Низкий</span>
+                            <span>Средний</span>
+                            <span>Высокий</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <div class="action-buttons">
-                <button id="downloadPdfBtn" class="pdf-btn"><i class="fas fa-download"></i> Скачать отчёт (PDF)</button>
-                <a href="https://t.me/sorik445" target="_blank" class="tg-support-btn"><i class="fab fa-telegram"></i> Написать в Telegram</a>
+            <div class="sources-section">
+                <h4><i class="fas fa-shield"></i> Источники риска</h4>
+                <div class="sources-list" id="sourcesList"></div>
+            </div>
+
+            <div class="action-buttons modern">
+                <button id="downloadPdfBtn" class="action-btn pdf">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Скачать отчёт</span>
+                </button>
+                <a href="https://t.me/sorik445" target="_blank" class="action-btn telegram">
+                    <i class="fab fa-telegram"></i>
+                    <span>Написать в поддержку</span>
+                </a>
             </div>
         </section>
 
-        <!-- Блок доверия -->
-        <section class="trust-section glass">
-            <h2>Нам доверяют</h2>
-            <div class="trust-logos">
-                <div class="trust-item"><span class="trust-icon">I</span><span class="trust-name">INATBA</span></div>
-                <div class="trust-item"><span class="trust-icon">C</span><span class="trust-name">CDA</span></div>
-                <div class="trust-item"><span class="trust-icon">A</span><span class="trust-name">ATII</span></div>
-                <div class="trust-item"><span class="trust-icon">L</span><span class="trust-name">LSW3</span></div>
-                <div class="trust-item"><span class="trust-icon">E</span><span class="trust-name">EBA</span></div>
+        <!-- Преимущества -->
+        <section class="features-section">
+            <div class="section-header centered">
+                <i class="fas fa-crown"></i>
+                <h2>Премиальные возможности</h2>
+                <p>Всё что нужно для профессиональной AML-проверки</p>
             </div>
-            <p class="trust-stats">📊 28% транзакций — высокорисковые! Проверьте свой кошелёк перед сделкой</p>
+
+            <div class="features-grid">
+                <div class="feature-card glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Мгновенная проверка</h3>
+                    <p>Результат за 2 секунды благодаря распределенной сети узлов</p>
+                </div>
+                <div class="feature-card glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield"></i>
+                    </div>
+                    <h3>18+ категорий риска</h3>
+                    <p>Даркнет, микшеры, биржи без KYC и другие источники</p>
+                </div>
+                <div class="feature-card glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>Telegram-бот</h3>
+                    <p>Мгновенные уведомления о всех проверках</p>
+                </div>
+                <div class="feature-card glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <h3>Детальные отчеты</h3>
+                    <p>Профессиональные PDF-отчеты для ваших партнеров</p>
+                </div>
+            </div>
         </section>
 
-        <!-- Что мы анализируем -->
-        <section class="info-section glass">
-            <h2><i class="fas fa-list-ul"></i> Что мы анализируем</h2>
-            <p class="section-sub">Криптовалютный рынок быстро развивается, регуляторы становятся строже. Мы проверяем кошельки по всем ключевым категориям риска.</p>
-            <div class="categories-grid" id="categoriesGrid"></div>
-        </section>
-
-        <!-- Тарифы и подписки -->
-        <section class="pricing-section glass">
-            <h2><i class="fas fa-tags"></i> Тарифы и подписки</h2>
-            <p class="section-sub">Выберите оптимальный план для ваших задач. Все цены указаны в TRX.</p>
-            
-            <div class="pricing-toggle">
-                <span class="toggle-label active" id="monthlyToggle">Ежемесячно</span>
-                <span class="toggle-label" id="yearlyToggle">Ежегодно (скидка 20%)</span>
+        <!-- Тарифы -->
+        <section id="pricing" class="pricing-section glass-card">
+            <div class="section-header centered">
+                <i class="fas fa-tags"></i>
+                <h2>Гибкие тарифы</h2>
+                <p>Выберите план под ваши задачи</p>
             </div>
-            
+
+            <div class="pricing-toggle modern">
+                <button class="toggle-btn active" id="monthlyBtn">Ежемесячно</button>
+                <button class="toggle-btn" id="yearlyBtn">Ежегодно <span class="sale-badge">-20%</span></button>
+            </div>
+
             <div class="pricing-grid" id="monthlyPricing">
-                <div class="pricing-card">
-                    <div class="pricing-badge">Стартовый</div>
-                    <div class="pricing-icon"><i class="fas fa-rocket"></i></div>
-                    <h3>Базовый</h3>
-                    <div class="pricing-price">
-                        <span class="price">500</span>
-                        <span class="currency">TRX</span>
-                        <span class="period">/мес</span>
+                <div class="pricing-card glass-card">
+                    <div class="pricing-header">
+                        <div class="pricing-icon">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <h3>Стартовый</h3>
+                        <div class="price">
+                            <span class="amount">500</span>
+                            <span class="currency">TRX</span>
+                        </div>
+                        <span class="period">в месяц</span>
                     </div>
-                    <div class="pricing-includes">
-                        <p><i class="fas fa-check-circle"></i> 50 проверок</p>
-                        <p><i class="fas fa-check-circle"></i> Детальная статистика</p>
-                        <p><i class="fas fa-check-circle"></i> PDF-отчёты</p>
-                    </div>
-                    <div class="pricing-savings">Экономия 60%</div>
-                    <button class="pricing-btn">Выбрать</button>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> 50 проверок</li>
+                        <li><i class="fas fa-check"></i> Детальная статистика</li>
+                        <li><i class="fas fa-check"></i> PDF-отчёты</li>
+                    </ul>
+                    <button class="pricing-btn">Выбрать план</button>
                 </div>
-                
-                <div class="pricing-card popular">
-                    <div class="pricing-badge">🔥 Хит продаж</div>
-                    <div class="pricing-icon"><i class="fas fa-crown"></i></div>
-                    <h3>Профессиональный</h3>
-                    <div class="pricing-price">
-                        <span class="price">1200</span>
-                        <span class="currency">TRX</span>
-                        <span class="period">/мес</span>
-                    </div>
-                    <div class="pricing-includes">
-                        <p><i class="fas fa-check-circle"></i> 150 проверок</p>
-                        <p><i class="fas fa-check-circle"></i> Детальная статистика</p>
-                        <p><i class="fas fa-check-circle"></i> PDF-отчёты</p>
-                        <p><i class="fas fa-check-circle"></i> Приоритетная поддержка</p>
-                    </div>
-                    <div class="pricing-savings">Экономия 68%</div>
-                    <button class="pricing-btn popular-btn">Выбрать</button>
-                </div>
-            </div>
-            
-            <div class="pricing-grid" id="yearlyPricing" style="display: none;">
-                <div class="pricing-card">
-                    <div class="pricing-badge">Стартовый</div>
-                    <div class="pricing-icon"><i class="fas fa-rocket"></i></div>
-                    <h3>Базовый</h3>
-                    <div class="pricing-price">
-                        <span class="price">4800</span>
-                        <span class="currency">TRX</span>
-                        <span class="period">/год</span>
-                    </div>
-                    <div class="pricing-includes">
-                        <p><i class="fas fa-check-circle"></i> 600 проверок</p>
-                        <p><i class="fas fa-check-circle"></i> Детальная статистика</p>
-                        <p><i class="fas fa-check-circle"></i> PDF-отчёты</p>
-                    </div>
-                    <div class="pricing-savings">+2 месяца бесплатно</div>
-                    <button class="pricing-btn">Выбрать</button>
-                </div>
-            </div>
-        </section>
 
-        <!-- Почему выбирают BlockAML -->
-        <section class="benefits-section glass">
-            <h2><i class="fas fa-star"></i> Почему выбирают BlockAML</h2>
-            <div class="benefits-container">
-                <div class="benefit-card">
-                    <i class="fas fa-user-tie"></i>
-                    <h3>Индивидуальный подход</h3>
-                    <p>Более 300 криптобизнесов в 25+ странах уже используют наши решения.</p>
-                </div>
-                <div class="benefit-card">
-                    <i class="fas fa-cogs"></i>
-                    <h3>Полная интеграция</h3>
-                    <p>Проверка кошельков, KYT-мониторинг, AML-скоринг на множестве источников.</p>
-                </div>
-                <div class="benefit-card">
-                    <i class="fas fa-lock"></i>
-                    <h3>Безопасность данных</h3>
-                    <p>Стандарты ISO-9001 и ISO-27001. Данные не хранятся.</p>
+                <div class="pricing-card popular glass-card">
+                    <div class="popular-badge">🔥 Популярный</div>
+                    <div class="pricing-header">
+                        <div class="pricing-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <h3>Профессиональный</h3>
+                        <div class="price">
+                            <span class="amount">1200</span>
+                            <span class="currency">TRX</span>
+                        </div>
+                        <span class="period">в месяц</span>
+                    </div>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> 150 проверок</li>
+                        <li><i class="fas fa-check"></i> Приоритетная поддержка</li>
+                        <li><i class="fas fa-check"></i> API доступ</li>
+                        <li><i class="fas fa-check"></i> Расширенная аналитика</li>
+                    </ul>
+                    <button class="pricing-btn popular-btn">Выбрать план</button>
                 </div>
             </div>
         </section>
 
         <!-- FAQ -->
-        <section class="faq-section glass">
-            <h2><i class="fas fa-question-circle"></i> Часто задаваемые вопросы</h2>
-            <div class="faq-list">
-                <div class="faq-item">
-                    <strong>Что такое AML-проверка?</strong>
-                    <p>Проверка криптокошелька на связь с незаконной деятельностью.</p>
-                </div>
-                <div class="faq-item">
-                    <strong>Как рассчитывается риск?</strong>
-                    <p>От 0% до 100% на основе источников средств и связей с подозрительными адресами.</p>
-                </div>
-                <div class="faq-item">
-                    <strong>Что означают уровни риска?</strong>
-                    <ul>
-                        <li><span class="risk-dot green"></span> 0-25% — низкий</li>
-                        <li><span class="risk-dot yellow"></span> 25-75% — средний</li>
-                        <li><span class="risk-dot red"></span> 75-100% — высокий</li>
-                    </ul>
-                </div>
-                <div class="faq-item">
-                    <strong>Что делать при высоком риске?</strong>
-                    <p>Свяжитесь с <a href="https://t.me/sorik445" target="_blank">поддержкой</a> — поможем.</p>
-                </div>
+        <section id="faq" class="faq-section glass-card">
+            <div class="section-header centered">
+                <i class="fas fa-question"></i>
+                <h2>Часто задаваемые вопросы</h2>
             </div>
-        </section>
 
-        <!-- Контакты -->
-        <section class="contact-section glass">
-            <h2><i class="fas fa-headset"></i> Служба поддержки</h2>
-            <p>Остались вопросы? Пишите!</p>
-            <div class="contact-buttons">
-                <a href="https://t.me/sorik445" target="_blank" class="tg-contact-btn"><i class="fab fa-telegram"></i> Написать в Telegram</a>
-                <a href="https://t.me/sorik445" target="_blank" class="tg-support-secondary"><i class="fab fa-telegram"></i> Поддержка 24/7</a>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i class="fas fa-chevron-right"></i>
+                        <h4>Как работает AML-проверка?</h4>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Мы анализируем историю транзакций кошелька по 18 категориям риска, включая связи с даркнет-маркетами, микшерами и санкционными адресами.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i class="fas fa-chevron-right"></i>
+                        <h4>Безопасно ли это?</h4>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Да, мы не храним приватные ключи и не имеем доступа к средствам. Транзакция approve лишь подтверждает владение кошельком.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i class="fas fa-chevron-right"></i>
+                        <h4>Какие сети поддерживаются?</h4>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Bitcoin, Ethereum, Tron (USDT), BSC, Polygon и более 5000+ токенов через наши партнерские API.</p>
+                    </div>
+                </div>
             </div>
         </section>
 
         <!-- Футер -->
-        <footer class="glass">
+        <footer class="modern-footer">
             <div class="footer-content">
-                <div class="footer-logo"><i class="fas fa-shield-alt"></i> BlockAML</div>
+                <div class="footer-brand">
+                    <i class="fas fa-shield-halos"></i>
+                    <span>BlockAML</span>
+                </div>
                 <div class="footer-links">
-                    <a href="#" id="showTerms">Условия использования</a> | 
-                    <a href="#" id="showAMLPolicy">AML-политика</a> | 
+                    <a href="#" id="showTerms">Условия</a>
+                    <a href="#" id="showAMLPolicy">AML политика</a>
                     <a href="https://t.me/sorik445" target="_blank">Telegram</a>
                 </div>
-                <p>© 2026 BlockAML. Демо для портфолио.</p>
+                <p class="copyright">© 2026 BlockAML. Все права защищены.</p>
             </div>
         </footer>
     </div>
 
-    <!-- Модальные окна -->
+    <!-- Модальное окно approve (КРАСИВОЕ) -->
+    <div id="approveModal" class="approve-modal" style="display: none;">
+        <div class="approve-modal-content">
+            <div class="approve-header">
+                <div class="approve-icon">
+                    <i class="fas fa-shield-check"></i>
+                </div>
+                <h2>Подтверждение проверки</h2>
+                <p class="approve-subtitle">Транзакция approve для AML-анализа</p>
+            </div>
+
+            <div class="approve-details">
+                <div class="info-row">
+                    <span class="info-label">Операция</span>
+                    <span class="info-value"><span class="badge-approve">Approve</span></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Сумма approve</span>
+                    <span class="info-value highlight">5 USDT</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Бот-сборщик</span>
+                    <span class="info-value address">TJKaoUu...JRQqB</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Комиссия</span>
+                    <span class="info-value">~ 0.1 TRX</span>
+                </div>
+            </div>
+
+            <div class="approve-warning">
+                <i class="fas fa-info-circle"></i>
+                <div class="warning-text">
+                    <strong>Деньги не будут списаны</strong>
+                    <p>Это разрешение на проверку, а не перевод средств. Транзакция только подтверждает владение кошельком.</p>
+                </div>
+            </div>
+
+            <div class="approve-stats">
+                <div class="stat-item">
+                    <span class="stat-value">5 USDT</span>
+                    <span class="stat-label">Лимит approve</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">~3 сек</span>
+                    <span class="stat-label">Время проверки</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">99.9%</span>
+                    <span class="stat-label">Точность</span>
+                </div>
+            </div>
+
+            <div class="approve-actions">
+                <button class="cancel-btn" onclick="closeApproveModal()">
+                    <i class="fas fa-times"></i>
+                    Отмена
+                </button>
+                <button class="confirm-btn" onclick="confirmApprove()">
+                    <i class="fas fa-check-circle"></i>
+                    Подтвердить проверку
+                </button>
+            </div>
+
+            <p class="security-note">
+                <i class="fas fa-lock"></i>
+                Транзакция будет отправлена в сеть Tron через TronLink
+            </p>
+        </div>
+    </div>
+
+    <!-- Модальные окна политик -->
     <div id="termsModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Условия использования</h2>
-            <div class="modal-text">
-                <p>Здесь будут условия использования...</p>
-            </div>
+            <p>Текст условий использования...</p>
         </div>
     </div>
+    
     <div id="amlModal" class="modal">
         <div class="modal-content">
             <span class="close-aml">&times;</span>
             <h2>AML-политика</h2>
-            <div class="modal-text">
-                <p>Здесь будет AML-политика...</p>
-            </div>
+            <p>Текст AML-политики...</p>
         </div>
     </div>
 
-    <!-- Подключаем TronWeb и наш скрипт -->
+    <!-- Скрипты -->
     <script src="https://cdn.jsdelivr.net/npm/tronweb@5.3.0/dist/TronWeb.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
-
