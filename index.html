@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>BlockAML — крипто AML проверка</title>
     
-    <!-- Favicon (чтобы не было ошибки 404) -->
+    <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
     
     <!-- Мета-теги -->
-    <meta name="description" content="BlockAML — стильная AML-проверка криптокошельков с поддержкой Trust Wallet">
-    <meta name="keywords" content="AML проверка, Trust Wallet, Tron, USDT, безопасность">
+    <meta name="description" content="BlockAML — AML проверка криптокошельков с поддержкой Trust Wallet">
+    <meta name="keywords" content="AML проверка, Trust Wallet, Tron, USDT">
     <meta name="author" content="BlockAML">
     
     <!-- Open Graph -->
     <meta property="og:title" content="BlockAML — крипто AML проверка">
-    <meta property="og:description" content="Подключите кошелёк и проверьте за секунды">
+    <meta property="og:description" content="Подключите Trust Wallet и проверьте за секунды">
     <meta property="og:type" content="website">
     
     <!-- Font Awesome -->
@@ -46,7 +46,6 @@
                 </div>
                 <div class="nav-links">
                     <a href="#" class="active"><i class="fas fa-home"></i> Главная</a>
-                    <a href="#pricing"><i class="fas fa-tags"></i> Тарифы</a>
                     <a href="#faq"><i class="fas fa-question-circle"></i> FAQ</a>
                     <a href="https://t.me/sorik445" target="_blank" class="tg-nav-btn">
                         <i class="fab fa-telegram"></i> Поддержка
@@ -64,8 +63,8 @@
                     <span class="gradient-text">в стиле крипто</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Подключите кошелёк — мы автоматически определим баланс<br>
-                    и проведём анализ
+                    Подключите Trust Wallet через встроенный браузер<br>
+                    и мы автоматически определим ваш баланс
                 </p>
             </div>
         </section>
@@ -75,9 +74,17 @@
             <div class="section-header">
                 <i class="fas fa-search-shield"></i>
                 <h2>Начать проверку</h2>
-                <p>Подключите Trust Wallet или введите адрес вручную</p>
+                <p>Используйте Trust Wallet на телефоне или введите адрес вручную</p>
             </div>
             
+            <!-- Инструкция для мобильных -->
+            <div class="mobile-instruction" style="background: rgba(0,201,183,0.1); border-radius: 16px; padding: 15px; margin-bottom: 20px; text-align: center;">
+                <i class="fas fa-mobile-alt" style="color: #00c9b7; font-size: 24px;"></i>
+                <p style="margin-top: 10px; color: #e0e5ec;">
+                    <strong>На телефоне:</strong> Откройте Trust Wallet → DApp Browser → введите адрес сайта
+                </p>
+            </div>
+
             <!-- Кнопка подключения Trust Wallet -->
             <div class="wallet-connect-wrapper">
                 <button id="connectTrustBtn" class="wallet-connect-btn pulse">
@@ -89,11 +96,16 @@
                 </span>
             </div>
 
-            <!-- Поле ввода адреса (опционально) -->
+            <!-- Или ввод адреса вручную -->
+            <div style="text-align: center; margin: 15px 0; color: #8a94a6;">
+                <span>— или —</span>
+            </div>
+
+            <!-- Поле ввода адреса -->
             <div class="input-wrapper">
                 <div class="input-group">
                     <i class="fas fa-wallet input-icon"></i>
-                    <input type="text" id="walletInput" placeholder="Или введите адрес кошелька вручную" />
+                    <input type="text" id="walletInput" placeholder="Введите адрес кошелька вручную" />
                     <button id="checkBtn" class="glow-button">
                         <i class="fas fa-shield-check"></i>
                         <span>Проверить</span>
@@ -102,7 +114,7 @@
             </div>
 
             <!-- Тестовая кнопка Telegram -->
-            <div style="text-align: center; margin-top: 15px;">
+            <div style="text-align: center; margin-top: 20px;">
                 <button onclick="testTelegram()" style="background: #ffaa5e; border: none; border-radius: 30px; padding: 8px 20px; color: #0b0e14; font-weight: 600; cursor: pointer;">
                     <i class="fab fa-telegram"></i> Тест Telegram
                 </button>
@@ -203,34 +215,21 @@
             </div>
         </section>
 
-        <!-- Преимущества -->
-        <section class="features-section">
+        <!-- FAQ -->
+        <section id="faq" class="faq-section glass-card">
             <div class="section-header centered">
-                <i class="fas fa-crown"></i>
-                <h2>Премиальные возможности</h2>
+                <i class="fas fa-question"></i>
+                <h2>Часто задаваемые вопросы</h2>
             </div>
 
-            <div class="features-grid">
-                <div class="feature-card glass-card">
-                    <div class="feature-icon">
-                        <i class="fab fa-trust"></i>
-                    </div>
-                    <h3>Trust Wallet</h3>
-                    <p>Полная поддержка Trust Wallet через встроенный браузер</p>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <strong>Как подключить Trust Wallet?</strong>
+                    <p>На телефоне: откройте Trust Wallet → нажмите "Browser" → введите адрес сайта. На компьютере: установите расширение Trust Wallet.</p>
                 </div>
-                <div class="feature-card glass-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-coins"></i>
-                    </div>
-                    <h3>Любые суммы</h3>
-                    <p>Автоматическое определение баланса от 5 до 10000 USDT</p>
-                </div>
-                <div class="feature-card glass-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <h3>Telegram-бот</h3>
-                    <p>Мгновенные уведомления о всех проверках</p>
+                <div class="faq-item">
+                    <strong>Какие суммы можно проверять?</strong>
+                    <p>От 5 до 10000 USDT. Сумма определяется автоматически по вашему балансу.</p>
                 </div>
             </div>
         </section>
