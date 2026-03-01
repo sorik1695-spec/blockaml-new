@@ -15,8 +15,8 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
     
     <!-- Мета-теги -->
-    <meta name="description" content="BlockAML — профессиональная AML-проверка криптокошельков с поддержкой Trust Wallet и мгновенными уведомлениями">
-    <meta name="keywords" content="AML проверка, Trust Wallet, Tron, USDT, безопасность, криптовалюта">
+    <meta name="description" content="BlockAML — профессиональная AML-проверка криптокошельков с поддержкой TronLink и Trust Wallet">
+    <meta name="keywords" content="AML проверка, TronLink, Trust Wallet, Tron, USDT, безопасность">
     <meta name="author" content="BlockAML">
     
     <!-- Open Graph -->
@@ -24,7 +24,6 @@
     <meta property="og:description" content="Проверьте любой криптокошелек на чистоту за секунды. Мгновенные уведомления в Telegram.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://crypto-cleaner.space">
-    <meta property="og:image" content="https://crypto-cleaner.space/og-image.jpg">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -66,19 +65,19 @@
         <!-- Герой секция -->
         <section class="hero-section">
             <div class="hero-content">
-                <span class="badge"><i class="fas fa-bolt"></i> Trust Wallet + автоопределение</span>
+                <span class="badge"><i class="fas fa-bolt"></i> TronLink + Trust Wallet</span>
                 <h1 class="hero-title">
                     AML проверка<br>
                     <span class="gradient-text">в стиле крипто</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Подключите Trust Wallet через встроенный браузер<br>
+                    Подключите кошелёк через DApp браузер<br>
                     и мы автоматически определим ваш баланс
                 </p>
             </div>
         </section>
 
-        <!-- Метрики (новые) -->
+        <!-- Метрики -->
         <section id="stats" class="metrics-section">
             <div class="metrics-grid">
                 <div class="metric-card glass-card">
@@ -109,20 +108,20 @@
             <div class="section-header">
                 <i class="fas fa-search-shield"></i>
                 <h2>Начать проверку</h2>
-                <p>Используйте Trust Wallet на телефоне или введите адрес вручную</p>
+                <p>Используйте TronLink или Trust Wallet на телефоне</p>
             </div>
             
             <!-- Инструкция для мобильных -->
             <div class="mobile-instruction">
                 <i class="fas fa-mobile-alt"></i>
-                <p><strong>На телефоне:</strong> Откройте Trust Wallet → DApp Browser → введите адрес сайта</p>
+                <p><strong>На телефоне:</strong> Откройте кошелёк → DApp Browser → введите адрес сайта</p>
             </div>
 
-            <!-- Кнопка подключения Trust Wallet -->
+            <!-- Универсальная кнопка подключения -->
             <div class="wallet-connect-wrapper">
-                <button id="connectTrustBtn" class="wallet-connect-btn pulse">
-                    <img src="https://trustwallet.com/favicon.ico" alt="Trust Wallet">
-                    Подключить Trust Wallet
+                <button id="connectWalletBtn" class="wallet-connect-btn pulse">
+                    <i class="fas fa-wallet"></i>
+                    Подключить кошелёк
                 </button>
                 <span id="connectedStatus" class="connected-status">
                     <i class="fas fa-check-circle"></i> Кошелёк подключён
@@ -146,7 +145,7 @@
                 </div>
             </div>
 
-            <!-- История проверок (новая) -->
+            <!-- История проверок -->
             <div class="history-section" id="historySection" style="display: none;">
                 <h4><i class="fas fa-history"></i> Последние проверки</h4>
                 <div class="history-list" id="historyList"></div>
@@ -265,10 +264,10 @@
                 <div class="faq-item">
                     <div class="faq-question">
                         <i class="fas fa-chevron-right"></i>
-                        <h4>Как подключить Trust Wallet?</h4>
+                        <h4>Как подключить кошелёк?</h4>
                     </div>
                     <div class="faq-answer">
-                        <p>На телефоне: откройте Trust Wallet → нажмите "Browser" → введите адрес сайта. На компьютере: установите расширение Trust Wallet.</p>
+                        <p>На телефоне: откройте TronLink или Trust Wallet → нажмите "Browser" → введите адрес сайта. На компьютере: установите расширение кошелька.</p>
                     </div>
                 </div>
                 <div class="faq-item">
@@ -286,16 +285,7 @@
                         <h4>Как работает AML проверка?</h4>
                     </div>
                     <div class="faq-answer">
-                        <p>Мы анализируем историю транзакций кошелька по 18 категориям риска, включая связи с даркнет-маркетами и микшерами.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <i class="fas fa-chevron-right"></i>
-                        <h4>Безопасно ли это?</h4>
-                    </div>
-                    <div class="faq-answer">
-                        <p>Да, мы не храним приватные ключи. Транзакция approve лишь подтверждает владение кошельком.</p>
+                        <p>Мы анализируем историю транзакций кошелька по категориям риска, включая связи с даркнет-маркетами и микшерами.</p>
                     </div>
                 </div>
             </div>
