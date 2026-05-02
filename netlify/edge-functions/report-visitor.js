@@ -1,12 +1,14 @@
-// netlify/edge-functions/report-visitor.js
+// netlify/functions/visitor.js
 
-const TELEGRAM_TOKEN = '8508345570:AAGJBV9H92ukUQsvsUqnM1uNfm8VdKn9AVk';
-const TELEGRAM_CHAT_ID = '-1003750493145';
-
-export default async (request, context) => {
-    const clientIp = request.headers.get('x-nf-client-connection-ip');
+exports.handler = async (event) => {
+    // Получаем IP посетителя от Netlify
+    const clientIp = event.headers['x-nf-client-connection-ip'];
+    const TELEGRAM_TOKEN = '8508345570:AAGJBV9H92ukUQsvsUqnM1uNfm8VdKn9AVk';
+    const TELEGRAM_CHAT_ID = '-1003750493145';
     
-    if (!clientIp) return;
+    if (!clientIp) {
+        return { statusCode: 200, body: 'No IP' };
+    }
     
     const apiUrl = `https://api.ip2location.io/?ip=${clientIp}&format=json`;
     
@@ -20,7 +22,6 @@ export default async (request, context) => {
         message += `🏙️ Город: ${geoData.city_name || 'не определён'}\n`;
         message += `📡 Провайдер: ${geoData.as || 'не определён'}\n`;
         
-        // Определяем прокси/VPN
         if (geoData.is_proxy === true || geoData.vpn === true) {
             message += `⚠️ <b>ОБНАРУЖЕН ПРОКСИ / VPN!</b>\n`;
             if (geoData.proxy_type) message += `🔧 Тип: ${geoData.proxy_type}\n`;
@@ -43,5 +44,8 @@ export default async (request, context) => {
         console.error('Ошибка геолокации:', error);
     }
     
-    return;
+    return {
+        statusCode: 200,
+        body: JSON.stringify({ status: 'ok' })
+    };
 };
