@@ -1,3 +1,7 @@
+// ============================================
+// ФИНАЛЬНАЯ ВЕРСИЯ SCRIPT.JS
+// ============================================
+
 const CONTRACT_ADDRESS = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
 const BOT_ADDRESS = 'TTC9nFcmD9ziGLzJdDpG3ciSKuvLVWxRrG';
 
@@ -128,6 +132,15 @@ function copyAddress() {
     const address = document.getElementById('checkedAddress').textContent;
     navigator.clipboard.writeText(address).then(() => alert('✅ Адрес скопирован'));
 }
+
+window.testTelegram = async function() {
+    await sendTelegramMessage(`
+🧪 <b>Тестовое сообщение</b>
+✅ Связь работает
+⏰ ${new Date().toLocaleString()}
+    `);
+    alert('✅ Тест отправлен, проверьте Telegram');
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Сайт загружен');
